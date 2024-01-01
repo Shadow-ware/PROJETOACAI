@@ -1,28 +1,28 @@
 import random
 
 
-comida = input("digite o que deseja que escolhemos \n")
+sortVariable = input("digite o que deseja que escolhemos \n")
 
-if comida == "janta":
-    sort = random.randint(1, 10)
-    if sort == 1:
+if sortVariable == "janta":
+    nSort = random.randint(1, 10)
+    if nSort == 1:
         print("Hamburguer")
-    if sort == 2:
+    if nSort == 2:
         print("Pizza")
-    if sort == 3:
+    if nSort == 3:
         print("Coxinha")
-    if sort == 4:
+    if nSort == 4:
         print("Pastel")
-    if sort == 5:
+    if nSort == 5:
         print("Crepe")
-    if sort == 6:
+    if nSort == 6:
         print("Parmegiana")
-    if sort == 7:
+    if nSort == 7:
         print("Salada")
-    if sort == 8:
+    if nSort == 8:
         print("Macarrao")
-    if sort == 9:
+    if nSort == 9:
         print("Ovo")
-    if sort == 10:
+    if nSort == 10:
         print("Pipoca")
     
