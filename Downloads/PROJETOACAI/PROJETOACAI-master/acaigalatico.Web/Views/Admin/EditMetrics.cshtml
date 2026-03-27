@@ -1,0 +1,72 @@
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Configurar Métricas";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h5 class="fw-bold m-0"><i class="fas fa-sliders-h me-2 text-primary"></i> Configurar Métricas Manuais</h5>
+            <small class="text-muted">Ajuste os valores exibidos no dashboard em tempo real</small>
+        </div>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-left me-1"></i> Voltar ao Dashboard
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success border-0 shadow-sm mb-4 rounded-3">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+        </div>
+    }
+
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                <form asp-action="UpdateMetrics" method="post">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Vendas de Hoje</label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text border-0 bg-white"><i class="fas fa-shopping-cart text-primary"></i></span>
+                                    <input type="number" name="vendasHoje" class="form-control border-0" value="@ViewBag.VendasHoje" min="0" required>
+                                </div>
+                                <small class="text-muted">Número total de pedidos exibido no topo</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Total de Clientes</label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text border-0 bg-white"><i class="fas fa-users text-primary"></i></span>
+                                    <input type="number" name="totalClientes" class="form-control border-0" value="@ViewBag.TotalClientes" min="0" required>
+                                </div>
+                                <small class="text-muted">Contagem total de clientes registrados</small>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-muted small text-uppercase">Faturamento Total (R$)</label>
+                                <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                                    <span class="input-group-text border-0 bg-white"><i class="fas fa-dollar-sign text-success"></i></span>
+                                    <input type="text" name="faturamento" class="form-control border-0" value="@(((decimal)ViewBag.Faturamento).ToString("N2"))" required>
+                                </div>
+                                <small class="text-muted">Valor total acumulado de vendas (ex: 1250,50)</small>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-12 text-center">
+                            <hr class="my-4">
+                            <p class="small text-muted mb-4"><i class="fas fa-info-circle me-1"></i> Ao salvar, o sistema ajustará os dados no banco de dados para refletir esses valores.</p>
+                            <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                                <i class="fas fa-save me-2"></i> Atualizar Dashboard
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

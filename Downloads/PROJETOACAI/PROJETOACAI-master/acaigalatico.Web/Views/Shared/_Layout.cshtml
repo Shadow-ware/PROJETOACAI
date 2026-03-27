@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Açaí Galáctico</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body style="min-height: 100vh; display: flex; flex-direction: column;">
+    <header class="header-overlay">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark box-shadow mb-3">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="Açaí Galáctico" class="logo-img" />
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+                    <ul class="navbar-nav flex-grow-1 justify-content-end gap-2">
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">
+                                <i class="fas fa-home me-1"></i> Início
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Products" asp-action="Index">
+                                <i class="fas fa-bars me-1"></i> Cardápio
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Order" asp-action="Index">
+                                <i class="fas fa-rocket me-1"></i> Fazer Pedido
+                            </a>
+                        </li>
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link user-menu-toggle dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-user me-2"></i> Olá, @User.Identity?.Name!
+                                </a>
+                                <ul class="dropdown-menu user-dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" asp-area="" asp-controller="Perfil" asp-action="Index">
+                                            <i class="fas fa-user-circle me-2"></i> Meu Perfil
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" asp-area="" asp-controller="Pedidos" asp-action="Index">
+                                            <i class="fas fa-briefcase me-2"></i> Meus Pedidos
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" asp-area="" asp-controller="Carrinho" asp-action="Index">
+                                            <i class="fas fa-shopping-cart me-2"></i> Carrinho
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider user-dropdown-divider" /></li>
+                                    <li>
+                                        <form class="px-3 py-1" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                            <button type="submit" class="dropdown-item d-flex align-items-center text-danger">
+                                                <i class="fas fa-sign-out-alt me-2"></i> Sair
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                            @if (User.IsInRole("Admin"))
+                            {
+                                <li class="nav-item nav-item-admin">
+                                    <a class="nav-link" asp-area="" asp-controller="Admin" asp-action="Index">
+                                        <i class="fas fa-user-shield me-1"></i> Painel Admin
+                                    </a>
+                                </li>
+                            }
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">
+                                    <i class="fas fa-user-plus me-1"></i> Cadastrar
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i> Entrar
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="Identity" asp-page="/Account/Login" asp-route-isAdmin="true">
+                                    <i class="fas fa-lock me-1"></i> Área Restrita
+                                </a>
+                            </li>
+                        }
+                        <li class="nav-item">
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Contact">
+                                <i class="fas fa-envelope me-1"></i> Contato
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" class="pb-3" style="flex: 1;">
+        @RenderBody()
+    </main>
+
+    <footer class="footer-galactico mt-auto">
+        <div class="footer-overlay"></div>
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Logo e Slogan -->
+                <div class="col-lg-4 text-center text-lg-start mb-4 mb-lg-0">
+                    <div class="footer-brand">
+                        <h3>Açaí Galáctico</h3>
+                        <p>Direto do espaço para você 🚀</p>
+                    </div>
+                </div>
+
+                <!-- Navegação e Status -->
+                <div class="col-lg-4 text-center mb-4 mb-lg-0">
+                    <div class="footer-links">
+                        <a href="/#quem-somos">Sobre nós</a>
+                        <span class="text-white-50">|</span>
+                        <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#privacyModal">Privacidade</a>
+                    </div>
+                    <div class="status-badge">
+                        <div class="status-dot"></div>
+                        <span>Sistema Online</span>
+                    </div>
+                </div>
+
+                <!-- Área do Usuário -->
+                <div class="col-lg-4 text-center text-lg-end">
+                    <div class="dropdown d-inline-block">
+                        <div class="user-footer-card dropdown-toggle" id="userFooterDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <div class="user-icon-wrapper">
+                                <i class="fas fa-user-astronaut"></i>
+                            </div>
+                            <div class="user-info-text text-start">
+                                @if (User.Identity.IsAuthenticated)
+                                {
+                                    <span>@User.Identity.Name</span>
+                                }
+                                else
+                                {
+                                    <span>Visitante</span>
+                                }
+                            </div>
+                        </div>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end border-secondary shadow-lg" aria-labelledby="userFooterDropdown">
+                            @if (User.Identity.IsAuthenticated)
+                            {
+                                <li><a class="dropdown-item" asp-area="" asp-controller="Perfil" asp-action="Index"><i class="fas fa-id-card me-2"></i> Meu Perfil</a></li>
+                                <li><hr class="dropdown-divider bg-secondary"></li>
+                                <li>
+                                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                        <button type="submit" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+                                    </form>
+                                </li>
+                            }
+                            else
+                            {
+                                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Login"><i class="fas fa-sign-in-alt me-2"></i> Login</a></li>
+                                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Register"><i class="fas fa-user-plus me-2"></i> Registrar</a></li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Direitos Autorais -->
+            <div class="footer-bottom text-center">
+                <p class="m-0">&copy; 2026 Açaí Galáctico. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal de Política de Privacidade -->
+    <div class="modal fade modal-galactico" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fs-3" id="privacyModalLabel">Política de Privacidade</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>O Açaí Galáctico valoriza a privacidade e a proteção dos dados pessoais de seus usuários. Esta Política de Privacidade tem como finalidade esclarecer, de forma transparente, como as informações são coletadas, utilizadas, armazenadas e protegidas, em conformidade com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018 – LGPD).</p>
+                    
+                    <h4>1. Coleta de Dados Pessoais</h4>
+                    <p>A coleta de dados pessoais ocorre de forma legítima, adequada e limitada ao necessário para a prestação dos serviços oferecidos pela plataforma. Dentre os dados que podem ser coletados, destacam-se:</p>
+                    <ul>
+                        <li>Nome completo</li>
+                        <li>Endereço de e-mail</li>
+                        <li>Informações de autenticação</li>
+                        <li>Dados fornecidos voluntariamente em formulários</li>
+                    </ul>
+
+                    <h4>2. Finalidade do Tratamento dos Dados</h4>
+                    <p>Os dados pessoais coletados são utilizados para as seguintes finalidades:</p>
+                    <ul>
+                        <li>Identificação e autenticação do usuário</li>
+                        <li>Garantia da segurança da aplicação</li>
+                        <li>Comunicação com o usuário</li>
+                        <li>Melhoria contínua dos serviços</li>
+                        <li>Cumprimento de obrigações legais e regulatórias</li>
+                    </ul>
+
+                    <h4>3. Armazenamento e Proteção dos Dados</h4>
+                    <p>O Açaí Galáctico adota medidas técnicas e administrativas adequadas para garantir a segurança das informações, incluindo:</p>
+                    <ul>
+                        <li>Controle de acesso restrito</li>
+                        <li>Criptografia de dados sensíveis</li>
+                        <li>Monitoramento de acessos e atividades</li>
+                        <li>Proteção contra acessos não autorizados</li>
+                    </ul>
+
+                    <h4>4. Compartilhamento de Dados</h4>
+                    <p>Os dados pessoais não serão compartilhados com terceiros, exceto nas seguintes hipóteses:</p>
+                    <ul>
+                        <li>Quando houver obrigação legal ou regulatória</li>
+                        <li>Mediante consentimento do titular dos dados</li>
+                        <li>Para cumprimento de ordens judiciais ou administrativas</li>
+                    </ul>
+
+                    <h4>5. Uso de Cookies</h4>
+                    <p>O sistema pode utilizar cookies e tecnologias similares com as seguintes finalidades:</p>
+                    <ul>
+                        <li>Manutenção de sessões autenticadas</li>
+                        <li>Melhoria da experiência do usuário</li>
+                        <li>Coleta de informações estatísticas não sensíveis</li>
+                    </ul>
+
+                    <h4>6. Direitos do Titular dos Dados</h4>
+                    <p>Nos termos da LGPD, o titular dos dados possui os seguintes direitos:</p>
+                    <ul>
+                        <li>Confirmação da existência de tratamento</li>
+                        <li>Acesso aos dados pessoais</li>
+                        <li>Correção de dados incompletos, inexatos ou desatualizados</li>
+                        <li>Solicitação de anonimização, bloqueio ou eliminação de dados</li>
+                        <li>Revogação do consentimento</li>
+                    </ul>
+
+                    <h4>7. Segurança da Informação</h4>
+                    <p>O Açaí Galáctico adota boas práticas de segurança da informação, visando proteger os dados contra incidentes, acessos indevidos, perda ou destruição.</p>
+
+                    <h4>8. Atualizações desta Política</h4>
+                    <p>Esta Política de Privacidade poderá ser atualizada a qualquer momento.</p>
+
+                    <h4>9. Contato</h4>
+                    <p>Email: <a href="mailto:suporte@acaigalactico.com" class="text-decoration-none" style="color: #e056fd;">suporte@acaigalactico.com</a></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-close-modal" data-bs-dismiss="modal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

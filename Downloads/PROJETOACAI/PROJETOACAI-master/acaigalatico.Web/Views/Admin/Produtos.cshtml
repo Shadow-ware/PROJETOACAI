@@ -1,0 +1,93 @@
+@model IEnumerable<acaigalatico.Application.DTOs.ProdutoDTO>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Gestão de Produtos";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold m-0">Gestão de Produtos</h4>
+        <p class="text-muted small m-0">Adicione, edite ou remova itens do cardápio</p>
+    </div>
+    <a asp-controller="Products" asp-action="Create" class="btn btn-purple rounded-pill px-4" style="background: var(--admin-purple); color: white;">
+        <i class="fas fa-plus me-2"></i> Novo Produto
+    </a>
+</div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="admin-card p-0 overflow-hidden">
+    <div class="table-responsive">
+        <table class="table table-admin m-0">
+            <thead>
+                <tr>
+                    <th>Imagem</th>
+                    <th>Nome</th>
+                    <th>Categoria</th>
+                    <th>Preço Custo</th>
+                    <th>Preço Venda</th>
+                    <th>Estoque</th>
+                    <th>Status</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>
+                            <img src="@(string.IsNullOrEmpty(item.ImagemUrl) ? "/images/default-acai.png" : item.ImagemUrl)" class="product-img-td shadow-sm" alt="@item.Nome" />
+                        </td>
+                        <td>
+                            <span class="fw-bold d-block">@item.Nome</span>
+                            <small class="text-muted">@item.Descricao</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-light text-dark rounded-pill border">@item.CategoriaNome</span>
+                        </td>
+                        <td class="text-muted">@item.PrecoCusto.ToString("C")</td>
+                        <td class="fw-bold">@(item.PrecoVenda?.ToString("C") ?? "N/A")</td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <span class="me-2">@item.EstoqueAtual</span>
+                                @if (item.EstoqueAtual <= item.EstoqueMinimo)
+                                {
+                                    <i class="fas fa-exclamation-triangle text-warning" title="Estoque Baixo"></i>
+                                }
+                            </div>
+                        </td>
+                        <td>
+                            @if (item.Ativo)
+                            {
+                                <span class="badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25 px-3">Ativo</span>
+                            }
+                            else
+                            {
+                                <span class="badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 px-3">Inativo</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <a asp-controller="Products" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-light rounded-circle me-1" title="Editar">
+                                    <i class="fas fa-edit text-primary"></i>
+                                </a>
+                                <form asp-controller="Products" asp-action="Delete" asp-route-id="@item.Id" method="post" onsubmit="return confirm('Deseja realmente excluir este produto?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-light rounded-circle" title="Excluir">
+                                        <i class="fas fa-trash text-danger"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

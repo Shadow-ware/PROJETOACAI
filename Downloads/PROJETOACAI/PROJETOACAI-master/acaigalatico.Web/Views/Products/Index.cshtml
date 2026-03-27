@@ -1,0 +1,170 @@
+@model Dictionary<string, string>
+
+@{
+    ViewData["Title"] = "Cardápio";
+    
+    // Função auxiliar para obter conteúdo com fallback
+    string GetContent(string key, string defaultValue) => 
+        Model.ContainsKey(key) ? Model[key] : defaultValue;
+}
+
+<!-- Menu Galaxy Section -->
+<div class="menu-section position-relative" style="min-height: 100vh; padding-top: 130px; padding-bottom: 50px; background: url('@GetContent("Menu_Background_Image", "/images/galaxiaa.jpg?v=2")') no-repeat center center/cover;">
+    
+    <!-- Dark Overlay for Readability -->
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 0;"></div>
+
+    <div class="container position-relative" style="z-index: 1;">
+        
+        <!-- Glass Card Container -->
+        <div class="glass-card mx-auto animate__animated animate__fadeInUp" style="max-width: 900px; padding: 50px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2);">
+            
+            <!-- Header Logo -->
+            <div class="text-center mb-5">
+                <img src="/images/logo-sem-escrita.png" style="height: 120px; filter: drop-shadow(0 0 10px #e056fd);" class="mb-3 animate__animated animate__pulse animate__infinite">
+                <h1 class="display-3 fw-bold mb-0" style="font-family: 'Poppins', sans-serif; letter-spacing: 3px; color: #fff; text-shadow: 0 0 20px #9b59b6;">
+                    AÇAÍ <span style="color: #e056fd;">GALÁCTICO</span>
+                </h1>
+                <div class="stars-decoration mt-2">
+                    <i class="fas fa-star text-warning small spin-slow"></i>
+                    <i class="fas fa-star text-white small" style="font-size: 0.5rem; opacity: 0.7;"></i>
+                    <i class="fas fa-star text-warning small spin-slow-reverse"></i>
+                </div>
+            </div>
+
+            <div class="row g-5">
+                <!-- Left Column: Menu Items & Prices -->
+                <div class="col-lg-7">
+                    
+                    <!-- Tradicional -->
+                    <div class="menu-category mb-5">
+                        <h3 class="fw-bold text-white border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.2) !important;">
+                            <i class="fas fa-certificate text-warning me-2"></i> @GetContent("Menu_Tradicional_Title", "Tradicional")
+                        </h3>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">300 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Price_300ml", "10,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">400 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Price_400ml", "12,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">500 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Price_500ml", "15,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">700 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Price_700ml", "18,00")</span>
+                        </div>
+                    </div>
+
+                    <!-- Trufado -->
+                    <div class="menu-category mb-5">
+                        <h3 class="fw-bold text-white border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.2) !important;">
+                            <i class="fas fa-ice-cream text-warning me-2"></i> @GetContent("Menu_Trufado_Title", "Trufado")
+                            <small class="d-block fs-6 fw-normal text-white-50 mt-1">@GetContent("Menu_Trufado_Subtitle", "(creme de chocolate)")</small>
+                        </h3>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">300 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Trufado_Price_300ml", "13,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">400 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Trufado_Price_400ml", "15,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">500 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Trufado_Price_500ml", "17,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">700 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Trufado_Price_700ml", "22,00")</span>
+                        </div>
+                    </div>
+
+                    <!-- Gourmet -->
+                    <div class="menu-category">
+                        <h3 class="fw-bold text-white border-bottom pb-2 mb-3" style="border-color: rgba(255,255,255,0.2) !important;">
+                            <i class="fas fa-gem text-warning me-2"></i> @GetContent("Menu_Gourmet_Title", "Gourmet")
+                            <small class="d-block fs-6 fw-normal text-white-50 mt-1">@GetContent("Menu_Gourmet_Subtitle", "(Nutella, Galak com Negresco)")</small>
+                        </h3>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">300 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Gourmet_Price_300ml", "15,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">400 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Gourmet_Price_400ml", "17,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">500 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Gourmet_Price_500ml", "20,00")</span>
+                        </div>
+                        <div class="price-item d-flex justify-content-between align-items-center mb-2">
+                            <span class="fs-5 text-white-50">700 ml</span> 
+                            <span class="fs-4 fw-bold text-highlight">R$ @GetContent("Menu_Gourmet_Price_700ml", "25,00")</span>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Rules Box -->
+                <div class="col-lg-5">
+                    <div class="rules-box p-4 h-100 d-flex flex-column justify-content-center text-center position-relative overflow-hidden" 
+                         style="background: rgba(255,255,255,0.9); border-radius: 20px; border: 4px solid #4a148c; box-shadow: 0 0 20px rgba(155, 89, 182, 0.5);">
+                        
+                        <!-- Decoration inside box -->
+                        <div style="position: absolute; top: -20px; right: -20px; width: 100px; height: 100px; background: #e056fd; border-radius: 50%; opacity: 0.1;"></div>
+                        <div style="position: absolute; bottom: -20px; left: -20px; width: 80px; height: 80px; background: #9b59b6; border-radius: 50%; opacity: 0.1;"></div>
+
+                        <h4 class="fw-bold mb-4 text-uppercase" style="color: #4a148c; letter-spacing: 1px;">Monte seu Açaí</h4>
+                        
+                        <ul class="list-unstyled mb-0 fs-5 text-start mx-auto" style="line-height: 2.0; color: #2c3e50;">
+                            <li class="mb-3 border-bottom pb-2" style="border-color: rgba(0,0,0,0.1) !important;">
+                                <span class="fw-bold" style="color: #4a148c;">300 ml:</span> <br>
+                                @GetContent("Menu_Limit_300ml_Fruits", "1") fruta e @GetContent("Menu_Limit_300ml_Toppings", "2") acompanhamentos.
+                            </li>
+                            <li class="mb-3 border-bottom pb-2" style="border-color: rgba(0,0,0,0.1) !important;">
+                                <span class="fw-bold" style="color: #4a148c;">400 ml:</span> <br>
+                                @GetContent("Menu_Limit_400ml_Fruits", "1") fruta e @GetContent("Menu_Limit_400ml_Toppings", "3") acompanhamentos.
+                            </li>
+                            <li class="mb-3 border-bottom pb-2" style="border-color: rgba(0,0,0,0.1) !important;">
+                                <span class="fw-bold" style="color: #4a148c;">500 ml:</span> <br>
+                                @GetContent("Menu_Limit_500ml_Fruits", "2") frutas e @GetContent("Menu_Limit_500ml_Toppings", "4") acompanhamentos.
+                            </li>
+                            <li>
+                                <span class="fw-bold" style="color: #4a148c;">700 ml:</span> <br>
+                                @GetContent("Menu_Limit_700ml_Fruits", "2") frutas e @GetContent("Menu_Limit_700ml_Toppings", "5") acompanhamentos.
+                            </li>
+                        </ul>
+
+                        <div class="mt-4 pt-3 border-top border-2" style="border-color: #4a148c !important;">
+                            <small class="fw-bold text-muted">ADICIONAIS EXTRAS COBRADOS À PARTE</small>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(GetContent("Menu_Items_Available", "")))
+                        {
+                            <div class="mt-4 text-start">
+                                <div class="fw-bold text-uppercase mb-2" style="color: #4a148c; letter-spacing: 1px;">Itens disponíveis</div>
+                                <pre class="mb-0" style="white-space: pre-wrap; font-family: inherit; color: #2c3e50;">@GetContent("Menu_Items_Available", "")</pre>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+<style>
+    .spin-slow { animation: spin 4s linear infinite; }
+    .spin-slow-reverse { animation: spin-reverse 5s linear infinite; }
+    
+    @@keyframes spin { 100% { transform: rotate(360deg); } }
+    @@keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+
+    .hover-opacity-100:hover { opacity: 1 !important; }
+</style>

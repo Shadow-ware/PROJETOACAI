@@ -1,0 +1,64 @@
+@model acaigalatico.Application.DTOs.ProdutoDTO
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Excluir Produto";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold m-0 text-danger">Excluir Produto</h4>
+        <p class="text-muted small m-0">Confirme a remoção definitiva do item #@Model.Id</p>
+    </div>
+    <a asp-controller="Admin" asp-action="Produtos" class="btn btn-light rounded-pill px-4 border">
+        <i class="fas fa-arrow-left me-2"></i> Voltar para Lista
+    </a>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="admin-card p-5 text-center shadow-lg">
+            <div class="icon-box mx-auto mb-4 bg-danger bg-opacity-10 text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                <i class="fas fa-exclamation-triangle fs-1"></i>
+            </div>
+            
+            <h5 class="fw-bold mb-3">Você tem certeza?</h5>
+            <p class="text-muted mb-4">
+                Você está prestes a excluir o produto <span class="fw-bold text-dark">"@Model.Nome"</span>. 
+                Esta ação não pode ser desfeita e removerá o item permanentemente do cardápio.
+            </p>
+
+            @if (!string.IsNullOrEmpty(Model.ImagemUrl))
+            {
+                <div class="mb-4">
+                    <img src="@Model.ImagemUrl" class="rounded-4 border shadow-sm" style="width: 150px; height: 150px; object-fit: cover;" />
+                </div>
+            }
+
+            <div class="bg-light p-3 rounded-4 mb-4 border border-opacity-10">
+                <div class="row text-start g-2">
+                    <div class="col-6 small text-muted text-uppercase fw-bold">Preço de Venda:</div>
+                    <div class="col-6 text-end fw-bold">@(Model.PrecoVenda?.ToString("C") ?? "N/A")</div>
+                    
+                    <div class="col-6 small text-muted text-uppercase fw-bold">Categoria:</div>
+                    <div class="col-6 text-end">@Model.CategoriaNome</div>
+                    
+                    <div class="col-6 small text-muted text-uppercase fw-bold">Estoque Atual:</div>
+                    <div class="col-6 text-end">@Model.EstoqueAtual unidades</div>
+                </div>
+            </div>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-danger rounded-pill py-3 fw-bold shadow-sm">
+                        <i class="fas fa-trash-alt me-2"></i> Confirmar Exclusão
+                    </button>
+                    <a asp-controller="Admin" asp-action="Produtos" class="btn btn-light rounded-pill py-2 border">
+                        Não, manter produto
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
