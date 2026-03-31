@@ -1,0 +1,50 @@
+@{
+    Layout = null;
+    var title = ViewData["Title"] as string ?? "Minha Conta";
+}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@title - Açaí Galáctico</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body style="min-height:100vh; display:flex; flex-direction:column;">
+    <header class="header-overlay">
+        <nav class="navbar navbar-expand-sm navbar-dark box-shadow">
+            <div class="container">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo.png" alt="Açaí Galáctico" class="logo-img" />
+                </a>
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <a class="btn btn-outline-light rounded-pill" asp-area="" asp-controller="Order" asp-action="Index">
+                        <i class="fas fa-rocket me-1"></i> Fazer Pedido
+                    </a>
+                    <a class="btn btn-outline-light rounded-pill" asp-area="" asp-controller="Home" asp-action="Contact">
+                        <i class="fas fa-envelope me-1"></i> Contato
+                    </a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main role="main" style="flex:1;">
+        <div class="container" style="padding-top: 110px; padding-bottom: 60px;">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="footer text-center mt-auto" style="background-color:#2d5a27; padding: 50px 0;">
+        <div class="container" style="color:white;">
+            &copy; 2026 - Açaí Galáctico
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

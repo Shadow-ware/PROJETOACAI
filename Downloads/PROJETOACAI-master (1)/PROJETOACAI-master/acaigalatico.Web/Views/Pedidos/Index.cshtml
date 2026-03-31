@@ -1,0 +1,42 @@
+@model List<acaigalatico.Web.Controllers.PedidosController.PedidoVm>
+<div class="auth-page">
+    <div class="auth-card">
+        <h3 class="fw-bold mb-4 d-flex align-items-center"><i class="fas fa-briefcase me-2 text-warning"></i> Meus Pedidos</h3>
+        <div class="table-responsive">
+            <table class="table table-dark table-borderless align-middle">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Data</th>
+                        <th>Status</th>
+                        <th class="text-end">Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr style="background: rgba(255,255,255,0.05);">
+                            <td class="fw-bold">#@p.Numero</td>
+                            <td>@p.Data.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (p.Status == "Entregue")
+                                {
+                                    <span class="badge bg-success rounded-pill">@p.Status</span>
+                                }
+                                else if (p.Status == "Em preparo")
+                                {
+                                    <span class="badge bg-warning text-dark rounded-pill">@p.Status</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-pill">@p.Status</span>
+                                }
+                            </td>
+                            <td class="text-end text-warning">R$ @(p.ValorTotal.ToString("0.00").Replace('.', ','))</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

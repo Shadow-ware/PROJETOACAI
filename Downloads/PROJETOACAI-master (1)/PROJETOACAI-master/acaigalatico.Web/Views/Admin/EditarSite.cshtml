@@ -1,0 +1,129 @@
+@model IEnumerable<acaigalatico.Domain.Entities.SiteContent>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Editar Site (Front-end)";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h5 class="fw-bold m-0"><i class="fas fa-edit me-2 text-primary"></i> Editar Conteúdo do Site</h5>
+            <small class="text-muted">Gerencie textos, imagens e descrições exibidas aos clientes</small>
+        </div>
+        <div class="d-flex gap-2 align-items-center flex-wrap">
+            <form asp-action="SeedMockData" method="post" onsubmit="return confirm('Isso irá resetar os textos do site para o padrão. Continuar?')">
+                <button type="submit" class="btn btn-sm btn-outline-warning rounded-pill px-3">
+                    <i class="fas fa-sync-alt me-1"></i> Resetar Páginas
+                </button>
+            </form>
+            <div class="nav-pills-admin d-flex gap-2" id="v-pills-tab" role="tablist">
+                <button class="btn btn-sm btn-outline-primary active rounded-pill px-3" id="pills-inicio-tab" data-bs-toggle="pill" data-bs-target="#pills-inicio" type="button">Início</button>
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" id="pills-cardapio-tab" data-bs-toggle="pill" data-bs-target="#pills-cardapio" type="button">Cardápio</button>
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" id="pills-fazerpedido-tab" data-bs-toggle="pill" data-bs-target="#pills-fazerpedido" type="button">Fazer Pedido</button>
+                <button class="btn btn-sm btn-outline-primary rounded-pill px-3" id="pills-contato-tab" data-bs-toggle="pill" data-bs-target="#pills-contato" type="button">Contato</button>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (!Model.Any())
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Nenhuma página encontrada. Clique no botão "Resetar Páginas" para inicializar o conteúdo.</p>
+        </div>
+    }
+
+    <div class="tab-content mt-4" id="pills-tabContent">
+        @if (Model != null && Model.Any())
+        {
+            var pages = new[] { "Inicio", "Cardapio", "FazerPedido", "Contato" };
+            foreach (var pageName in pages)
+            {
+                var pageItems = Model.Where(c => c.Page == pageName).OrderBy(c => c.Key).ToList();
+                <div class="tab-pane fade @(pageName == "Inicio" ? "show active" : "")" id="pills-@pageName.ToLower()" role="tabpanel">
+                    <div class="row g-4">
+                        @if (!pageItems.Any())
+                        {
+                            <div class="col-12 text-center py-4">
+                                <p class="text-muted small">Nenhum item configurável para esta página.</p>
+                            </div>
+                        }
+                        @foreach (var content in pageItems)
+                        {
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card border-0 shadow-sm rounded-4 h-100 bg-white overflow-hidden">
+                                    <div class="card-header bg-light border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                                        <span class="badge bg-primary-subtle text-primary rounded-pill text-uppercase" style="font-size: 0.65rem; letter-spacing: 0.5px;">
+                                            @content.Key.Replace(pageName + "_", "").Replace("Home_", "").Replace("Menu_", "").Replace("Order_", "").Replace("Contato_", "").Replace("_", " ")
+                                        </span>
+                                        <i class="fas @(content.Type == "Image" ? "fa-image" : (content.Type == "Description" ? "fa-align-left" : "fa-font")) text-muted opacity-50"></i>
+                                    </div>
+                                    <div class="card-body p-4">
+                                        <form asp-action="UpdateSiteContent" method="post" enctype="multipart/form-data">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="key" value="@content.Key" />
+                                            
+                                            @if (content.Type == "Text")
+                                            {
+                                                <div class="mb-3">
+                                                    <input type="text" name="value" class="form-control rounded-3 border bg-light-subtle" value="@content.Value" placeholder="Texto curto..." />
+                                                </div>
+                                            }
+                                            else if (content.Type == "Description")
+                                            {
+                                                <div class="mb-3">
+                                                    <textarea name="value" class="form-control rounded-3 border bg-light-subtle" rows="5" placeholder="Descrição longa...">@content.Value</textarea>
+                                                </div>
+                                            }
+                                            else if (content.Type == "Image")
+                                            {
+                                                <div class="mb-3">
+                                                    <div class="preview-img-container mb-3 position-relative rounded-3 overflow-hidden bg-light" style="height: 180px;">
+                                                        <img src="@content.Value" alt="Preview" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='/images/logo-sem-escrita.png'" />
+                                                        <div class="position-absolute bottom-0 start-0 w-100 p-2 bg-dark bg-opacity-50 text-white small truncate" style="font-size: 0.7rem;">
+                                                            @content.Value
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <div class="input-group input-group-sm mb-2 shadow-none">
+                                                        <span class="input-group-text bg-light border-end-0"><i class="fas fa-link text-muted"></i></span>
+                                                        <input type="text" name="value" class="form-control border-start-0 bg-light" value="@content.Value" placeholder="URL da imagem" />
+                                                    </div>
+                                                    
+                                                    <div class="upload-wrapper">
+                                                        <input type="file" name="file" class="form-control form-control-sm rounded-3 shadow-none" accept="image/*" />
+                                                        <small class="text-muted d-block mt-1" style="font-size: 0.7rem;"><i class="fas fa-info-circle me-1"></i> Upload local sobrescreve a URL acima.</small>
+                                                    </div>
+                                                </div>
+                                            }
+
+                                            <button type="submit" class="btn btn-primary w-100 rounded-pill shadow-sm mt-2">
+                                                <i class="fas fa-save me-1"></i> Salvar Alteração
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

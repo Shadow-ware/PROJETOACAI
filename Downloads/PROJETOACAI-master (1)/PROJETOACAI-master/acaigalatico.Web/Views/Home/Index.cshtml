@@ -1,0 +1,164 @@
+@model Dictionary<string, string>
+@{
+    ViewData["Title"] = "Início";
+    
+    // Função auxiliar para obter conteúdo com fallback
+    string GetContent(string key, string defaultValue) => 
+        Model.ContainsKey(key) ? Model[key] : defaultValue;
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-center text-white d-flex align-items-center justify-content-center position-relative" 
+     style="min-height: 100vh; padding-top: 180px; padding-bottom: 120px; background: url('@GetContent("Home_Hero_Background", "/images/galaxiaa.jpg")') no-repeat center center/cover;">
+    
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <img src="/images/logo-sem-escrita.png" alt="Açaí Galáctico Logo" class="img-fluid mb-3 animate__animated animate__zoomIn" style="max-height: 150px;">
+                <h1 class="display-1 fw-bold mb-3" style="text-shadow: 0 0 20px #A91079;">
+                    @GetContent("Home_Hero_Title", "AÇAÍ GALÁCTICO")
+                </h1>
+                <p class="lead mb-5 fs-3">@GetContent("Home_Hero_Subtitle", "Explore o universo de sabores do melhor açaí da região!")</p>
+                
+                <div class="d-flex justify-content-center gap-3 espaco-botao">
+                    <a asp-controller="Order" asp-action="Index" class="btn btn-success btn-lg px-5 py-3 rounded-pill shadow-lg animate__animated animate__pulse animate__infinite">
+                        <i class="fas fa-motorcycle me-2"></i> FAZER PEDIDO
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quem Somos Section -->
+<div id="quem-somos" class="section-padding position-relative" style="background-color: #4a148c; padding-top: 120px;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <img src="@GetContent("Home_About_Image", "/images/entrada-acai.jpeg")" alt="Nosso Açaí" class="img-fluid rounded-4 shadow-lg border border-2 border-secondary">
+            </div>
+            <div class="col-md-6 ps-md-5">
+                <h2 class="display-4 fw-bold mb-4">Quem <span class="text-highlight">Somos</span>?</h2>
+                <p class="lead text-white-50">
+                    @GetContent("Home_About_Text", "No Açaí Galáctico, somos uma pequena loja familiar apaixonada por entregar sabor e qualidade.")
+                </p>
+                <p class="text-white-50">
+                    Aqui, cada cliente é recebido como parte da nossa galáxia, com atendimento próximo, acolhedor e aquele toque especial de quem faz tudo com amor. Nosso espaço pode ser pequeno, mas nossos sabores são enormes e estamos sempre prontos para te proporcionar uma experiência realmente galáctica.
+                </p>
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                        <span class="fs-5">Produtos Fresquinhos</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-bolt text-warning fa-2x me-3"></i>
+                        <span class="fs-5">Entrega na Velocidade da Luz</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-heart text-danger fa-2x me-3"></i>
+                        <span class="fs-5">Feito com Amor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Destaques / Novidades -->
+<div class="section-padding bg-galaxy" style="position: relative; padding-top: 120px;">
+    <!-- Drip Divider (Melting Effect) -->
+    <div style="position: absolute; top: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 80px;">
+            <path d="M0,0 L1200,0 L1200,20 C1150,20 1150,90 1100,90 C1050,90 1050,20 1000,20 C950,20 950,110 900,110 C850,110 850,20 800,20 C750,20 750,70 700,70 C650,70 650,20 600,20 C550,20 550,100 500,100 C450,100 450,20 400,20 C350,20 350,80 300,80 C250,80 250,20 200,20 C150,20 150,120 100,120 C50,120 50,20 0,20 Z" fill="#4a148c"></path>
+        </svg>
+    </div>
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold">Exposição dos nossos <span class="text-highlight">Açaís</span></h2>
+            <p class="text-white-50">Confira o que acabou de chegar do espaço sideral para sua tigela!</p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Card 1 -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@GetContent("Home_Expo_Img1", "/images/acai-expo-1.jpeg")" class="card-img-top" alt="@GetContent("Home_Expo_Title1", "Açaí")">
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold">@GetContent("Home_Expo_Title1", "Açaí com Galak")</h5>
+                        <p class="card-text text-muted mb-0">@GetContent("Home_Expo_Desc1", "")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2 -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@GetContent("Home_Expo_Img2", "/images/acai-expo-2.jpeg")" class="card-img-top" alt="@GetContent("Home_Expo_Title2", "Açaí")">
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold">@GetContent("Home_Expo_Title2", "Açaí com morango e Nutella")</h5>
+                        <p class="card-text text-muted mb-0">@GetContent("Home_Expo_Desc2", "")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3 -->
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@GetContent("Home_Expo_Img3", "/images/acai-expo-3.jpeg")" class="card-img-top" alt="@GetContent("Home_Expo_Title3", "Açaí")">
+                    <div class="card-body text-center">
+                        <h5 class="card-title fw-bold">@GetContent("Home_Expo_Title3", "Açaí com M&M")</h5>
+                        <p class="card-text text-muted mb-0">@GetContent("Home_Expo_Desc3", "")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Produtos Além de Açaí -->
+<div class="section-padding" style="background-color: white; position: relative; padding-top: 100px; padding-bottom: 120px;">
+    <!-- Drip Divider (Melting Effect - Purple to White) -->
+    <div style="position: absolute; top: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 80px;">
+            <path d="M0,0 L1200,0 L1200,20 C1150,20 1150,90 1100,90 C1050,90 1050,20 1000,20 C950,20 950,110 900,110 C850,110 850,20 800,20 C750,20 750,70 700,70 C650,70 650,20 600,20 C550,20 550,100 500,100 C450,100 450,20 400,20 C350,20 350,80 300,80 C250,80 250,20 200,20 C150,20 150,120 100,120 C50,120 50,20 0,20 Z" fill="#8e44ad"></path>
+        </svg>
+    </div>
+
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold" style="color: #4a148c;">Produtos além de <span class="text-highlight" style="color: #8e44ad;">Açaí</span></h2>
+        </div>
+
+        <div class="row justify-content-center">
+            <!-- Single Card: Bebidas, Sorvetes e Salgados -->
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@GetContent("Home_Others_Image", "/images/produtos.jpg")" class="card-img-top" alt="Diversos" style="height: 350px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <p class="card-text text-white-50 fs-5 fw-bold text-uppercase">@GetContent("Home_Others_Title", "BEBIDAS, SORVETES E SALGADOS")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5 espaco-botao-whatsapp">
+            <div class="glass-card d-inline-block p-4 animate__animated animate__pulse animate__infinite" style="background: #4a148c; border-radius: 20px;">
+                <a href="https://wa.me/5511982599249" target="_blank" class="text-decoration-none text-white">
+                    <i class="fab fa-whatsapp fa-2x me-2"></i> 
+                    <span class="fs-4 fw-bold">CHAMAR NO WHATSAPP</span>
+                </a>
+                <p class="mb-0 text-white-50 mt-2">Dúvidas? Fale com a gente!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .espaco-botao {
+        margin-bottom: 100px;
+    }
+    .espaco-botao-whatsapp {
+        margin-bottom: 100px;
+    }
+</style>

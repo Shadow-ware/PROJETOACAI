@@ -1,0 +1,43 @@
+@model acaigalatico.Web.ViewModels.PerfilViewModel
+<div class="auth-page">
+    <div class="auth-card">
+        <h3 class="fw-bold mb-4"><i class="fas fa-user-circle me-2 text-warning"></i> Meu Perfil</h3>
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success rounded-3 mb-3">@TempData["SuccessMessage"]</div>
+        }
+        <form asp-action="Update" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            <div class="text-center mb-4">
+                <img src="@(string.IsNullOrWhiteSpace(Model.CurrentPhotoUrl) ? "/images/logo-sem-escrita.png" : Model.CurrentPhotoUrl)" class="rounded-circle border" style="width: 120px; height: 120px; object-fit: cover;">
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-white-50">Alterar foto</label>
+                <input type="file" class="form-control auth-input" asp-for="Photo" accept="image/*" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-white-50">Nome</label>
+                <input class="form-control auth-input" asp-for="NewUserName" />
+                <span asp-validation-for="NewUserName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label class="form-label text-white-50">Email</label>
+                <input class="form-control auth-input" asp-for="NewEmail" />
+                <span asp-validation-for="NewEmail" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label text-white-50">Senha atual</label>
+                    <input type="password" class="form-control auth-input" asp-for="CurrentPassword" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label text-white-50">Nova senha</label>
+                    <input type="password" class="form-control auth-input" asp-for="NewPassword" />
+                </div>
+            </div>
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary rounded-pill py-2 fw-bold">Salvar alterações</button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,510 @@
+@{
+    ViewData["Title"] = "Fazer Pedido";
+    var fruits = ViewBag.Fruits as List<string>;
+    var toppings = ViewBag.Toppings as dynamic; 
+    var siteContents = ViewBag.SiteContents as Dictionary<string, string>;
+
+    string GetContent(string key, string defaultValue) => 
+        siteContents != null && siteContents.ContainsKey(key) ? siteContents[key] : defaultValue;
+}
+
+<div class="order-page">
+    <div class="order-left" style="background-image: url('@GetContent("Order_Side_Image", "/images/acai-expo-1.jpeg")');">
+        <div class="order-left-overlay"></div>
+        <div class="order-left-text">
+            <h1 class="order-left-title">@GetContent("Order_Side_Title", "Sabor de Outro Mundo")</h1>
+            <p class="order-left-sub">@GetContent("Order_Welcome_Text", "Monte o açaí perfeito para sua viagem galáctica.")</p>
+        </div>
+    </div>
+
+    <div class="order-right" style="background: url('@GetContent("Order_Background_Image", "/images/galaxiaa.jpg")') no-repeat center center/cover;">
+        <div class="order-right-overlay"></div>
+
+        <div class="order-right-inner">
+            <div class="p-4 border-bottom border-secondary bg-black bg-opacity-50">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="text-white m-0 text-uppercase fw-bold"><i class="fas fa-rocket text-warning me-2"></i> Monte seu Açaí Galáctico</h4>
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-light btn-sm rounded-pill"><i class="fas fa-times"></i> Fechar</a>
+                </div>
+            </div>
+
+            <div class="flex-grow-1 overflow-auto p-4 custom-scrollbar">
+                <form asp-action="SubmitOrder" method="post" id="orderForm">
+                        
+                        <!-- 1. Tipo e Tamanho (Cards Compactos) -->
+                        <div class="card glass-panel mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title text-white mb-3"><i class="fas fa-wine-glass-alt text-warning me-2"></i> Base e Tamanho</h5>
+                                
+                                <!-- Tipo -->
+                                <div class="mb-3">
+                                    <label class="text-white-50 small mb-2">ESCOLHA O TIPO</label>
+                                    <div class="btn-group w-100" role="group">
+                                        <input type="radio" class="btn-check" name="type" id="type-tradicional" value="Tradicional" checked onchange="updatePrices()">
+                                        <label class="btn btn-outline-light" for="type-tradicional">Tradicional</label>
+
+                                        <input type="radio" class="btn-check" name="type" id="type-trufado" value="Trufado" onchange="updatePrices()">
+                                        <label class="btn btn-outline-light" for="type-trufado">Trufado</label>
+
+                                        <input type="radio" class="btn-check" name="type" id="type-gourmet" value="Gourmet" onchange="updatePrices()">
+                                        <label class="btn btn-outline-light" for="type-gourmet">Gourmet</label>
+                                    </div>
+                                </div>
+
+                                <!-- Tamanho -->
+                                <div>
+                                    <label class="text-white-50 small mb-2">ESCOLHA O TAMANHO</label>
+                                    <div class="row g-2" id="size-options">
+                                        <!-- Populated by JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 2. Quantidade -->
+                        <div class="card glass-panel mb-4">
+                            <div class="card-body d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-white m-0">Quantidade</h5>
+                                    <small class="text-white-50">Quantos açaís iguais a este?</small>
+                                </div>
+                                <div class="input-group" style="width: 140px;">
+                                    <button class="btn btn-outline-light" type="button" onclick="changeQuantity(-1)"><i class="fas fa-minus"></i></button>
+                                    <input type="text" class="form-control text-center bg-transparent text-white border-light" id="quantity" name="quantity" value="1" readonly>
+                                    <button class="btn btn-outline-light" type="button" onclick="changeQuantity(1)"><i class="fas fa-plus"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 3. Frutas -->
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="text-white m-0">Frutas <small class="text-warning fs-6 ms-2" id="fruit-limit-text"></small></h5>
+                                <i class="fas fa-check text-success" id="fruit-check-icon" style="display:none;"></i>
+                            </div>
+                            <div class="list-group glass-list">
+                                @foreach (var fruit in fruits)
+                                {
+                                    <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center bg-transparent text-white border-secondary">
+                                        <div>
+                                            <span class="fw-bold">@fruit</span>
+                                            <small class="d-block text-white-50">Fruta fresca selecionada</small>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input fruit-check fs-4" type="checkbox" name="fruits" value="@fruit">
+                                        </div>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- 4. Acompanhamentos (Lista Rica) -->
+                        <div class="mb-5">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="text-white m-0">Acompanhamentos <small class="text-warning fs-6 ms-2" id="topping-limit-text"></small></h5>
+                                <i class="fas fa-check text-success" id="topping-check-icon" style="display:none;"></i>
+                            </div>
+                            <div class="list-group glass-list">
+                                @foreach (var item in toppings)
+                                {
+                                    <label class="list-group-item list-group-item-action d-flex align-items-center bg-transparent text-white border-secondary p-3">
+                                        <img src="@item.ImageUrl" class="rounded-circle me-3 border border-light" style="width: 50px; height: 50px; object-fit: cover;">
+                                        <div class="flex-grow-1">
+                                            <span class="fw-bold d-block">@item.Name</span>
+                                            <small class="text-white-50">@item.Description</small>
+                                        </div>
+                                        <div class="form-check ms-3">
+                                            <input class="form-check-input topping-check fs-4" type="checkbox" name="toppings" value="@item.Name">
+                                        </div>
+                                    </label>
+                                }
+                            </div>
+                        </div>
+
+                        <!-- 5. Observação sobre Entrega -->
+                        <div class="card glass-panel mb-4 border-warning" style="border-style: dashed;">
+                            <div class="card-body text-center">
+                                <h5 class="card-title text-warning mb-3"><i class="fas fa-motorcycle me-2"></i> Entrega / Retirada</h5>
+                                <p class="text-white-50 mb-3" style="font-size: 0.95rem; white-space: pre-line;">
+                                    @GetContent("Order_Delivery_Note", "Prezado cliente, informamos que no momento não dispomos de entregadores próprios.\nRecomendamos solicitar a retirada do seu pedido via Uber Moto.")
+                                </p>
+                                <a href="@GetContent("Order_Delivery_Link", "https://m.uber.com/")" target="_blank" class="btn btn-outline-light w-100 fw-bold hover-warning">
+                                    <i class="fab fa-uber me-2"></i> Abrir Aplicativo Uber
+                                </a>
+                            </div>
+                        </div>
+
+                </form>
+            </div>
+
+            <div class="p-3 border-top border-secondary bg-black bg-opacity-75">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-white-50 d-block">Total do Pedido</small>
+                        <span id="total-price" class="h2 text-warning fw-bold m-0">R$ 0,00</span>
+                    </div>
+                    <button type="button" id="openPaymentModal" class="btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-lg">
+                        <i class="fas fa-check me-2"></i> Finalizar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered payment-modal-dialog">
+        <div class="modal-content payment-modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <i class="fas fa-credit-card me-2 text-warning"></i> Pagamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <p class="text-white-50 mb-3">Escolha a forma de pagamento:</p>
+                <div class="d-flex gap-3 mb-4">
+                    <button type="button" class="payment-method-btn active" data-method="card">
+                        <i class="fas fa-credit-card me-2"></i> Débito / Crédito
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="pix">
+                        <i class="fas fa-qrcode me-2"></i> Pix
+                    </button>
+                </div>
+
+                <div id="payment-method-card">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Nome no cartão</label>
+                        <input id="cardName" class="form-control auth-input" placeholder="Digite o nome impresso no cartão" autocomplete="cc-name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50">Número do cartão</label>
+                        <input id="cardNumber" class="form-control auth-input" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white-50">Validade</label>
+                            <input id="cardExpiry" class="form-control auth-input" inputmode="numeric" placeholder="MM/AA" autocomplete="cc-exp" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white-50">CVV</label>
+                            <input id="cardCvv" type="password" class="form-control auth-input" inputmode="numeric" placeholder="123" autocomplete="cc-csc" />
+                        </div>
+                    </div>
+                    <div class="form-check mt-2">
+                        <input class="form-check-input" type="checkbox" id="saveCardCheck">
+                        <label class="form-check-label text-white-50" for="saveCardCheck">Salvar cartão</label>
+                    </div>
+                </div>
+
+                <div id="payment-method-pix" class="d-none text-center">
+                    <div class="text-white-50 mb-3">Escaneie o QR Code para pagar:</div>
+                    <div class="payment-qr-wrap mx-auto mb-3">
+                        <div class="payment-qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                    </div>
+                    <div class="text-white-50">QR Code será gerado</div>
+                    <div class="text-white-50 mt-2" style="font-size: 0.9rem;">Depois de pagar, clique em finalizar pedido.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="paymentSubmit" class="btn btn-success rounded-pill px-4 fw-bold">Finalizar Pedido</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const rawPrices = {
+            "Tradicional": {
+                "300ml": "@GetContent("Menu_Price_300ml", "10.00")",
+                "400ml": "@GetContent("Menu_Price_400ml", "12.00")",
+                "500ml": "@GetContent("Menu_Price_500ml", "15.00")",
+                "700ml": "@GetContent("Menu_Price_700ml", "18.00")"
+            },
+            "Trufado": {
+                "300ml": "@GetContent("Menu_Trufado_Price_300ml", "13.00")",
+                "400ml": "@GetContent("Menu_Trufado_Price_400ml", "15.00")",
+                "500ml": "@GetContent("Menu_Trufado_Price_500ml", "17.00")",
+                "700ml": "@GetContent("Menu_Trufado_Price_700ml", "22.00")"
+            },
+            "Gourmet": {
+                "300ml": "@GetContent("Menu_Gourmet_Price_300ml", "15.00")",
+                "400ml": "@GetContent("Menu_Gourmet_Price_400ml", "17.00")",
+                "500ml": "@GetContent("Menu_Gourmet_Price_500ml", "20.00")",
+                "700ml": "@GetContent("Menu_Gourmet_Price_700ml", "25.00")"
+            }
+        };
+
+        const prices = {
+            "Tradicional": {},
+            "Trufado": {},
+            "Gourmet": {}
+        };
+
+        function parsePrice(input) {
+            if (!input) return 0;
+            const normalized = input.toString().replace(',', '.').replace(/[^0-9.]/g, '');
+            const value = parseFloat(normalized);
+            return Number.isFinite(value) ? value : 0;
+        }
+
+        function parseIntSafe(input, fallback) {
+            const value = parseInt((input ?? "").toString().trim(), 10);
+            return Number.isFinite(value) ? value : fallback;
+        }
+
+        for (const [type, sizeMap] of Object.entries(rawPrices)) {
+            for (const [size, raw] of Object.entries(sizeMap)) {
+                prices[type][size] = parsePrice(raw);
+            }
+        }
+
+        const limits = {
+            "300ml": { fruits: parseIntSafe("@GetContent("Menu_Limit_300ml_Fruits", "1")", 1), toppings: parseIntSafe("@GetContent("Menu_Limit_300ml_Toppings", "2")", 2) },
+            "400ml": { fruits: parseIntSafe("@GetContent("Menu_Limit_400ml_Fruits", "1")", 1), toppings: parseIntSafe("@GetContent("Menu_Limit_400ml_Toppings", "3")", 3) },
+            "500ml": { fruits: parseIntSafe("@GetContent("Menu_Limit_500ml_Fruits", "2")", 2), toppings: parseIntSafe("@GetContent("Menu_Limit_500ml_Toppings", "4")", 4) },
+            "700ml": { fruits: parseIntSafe("@GetContent("Menu_Limit_700ml_Fruits", "2")", 2), toppings: parseIntSafe("@GetContent("Menu_Limit_700ml_Toppings", "5")", 5) }
+        };
+
+        let currentType = "Tradicional";
+        let currentSize = "300ml";
+        let quantity = 1;
+
+        function updatePrices() {
+            // Get selected type
+            const typeRadios = document.getElementsByName("type");
+            for (const radio of typeRadios) {
+                if (radio.checked) {
+                    currentType = radio.value;
+                    break;
+                }
+            }
+
+            // Render Size Options
+            const sizeContainer = document.getElementById("size-options");
+            sizeContainer.innerHTML = "";
+            
+            const sizePrices = prices[currentType];
+            for (const [size, price] of Object.entries(sizePrices)) {
+                const isChecked = size === currentSize ? "checked" : "";
+                const activeClass = size === currentSize ? "active-size" : "";
+                
+                const col = document.createElement("div");
+                col.className = "col-6";
+                col.innerHTML = `
+                    <input type="radio" class="btn-check size-radio" name="size" id="size-${size}" value="${size}" ${isChecked} onchange="updateSize(this.value)">
+                    <label class="btn btn-outline-light w-100 p-2 d-flex justify-content-between align-items-center ${activeClass}" for="size-${size}">
+                        <span class="fw-bold">${size}</span>
+                        <span class="badge bg-light text-dark">R$ ${price.toFixed(2).replace('.', ',')}</span>
+                    </label>
+                `;
+                sizeContainer.appendChild(col);
+            }
+
+            updateTotal();
+        }
+
+        function updateSize(size) {
+            currentSize = size;
+            updateLimits();
+            updateTotal();
+        }
+
+        function changeQuantity(delta) {
+            quantity += delta;
+            if (quantity < 1) quantity = 1;
+            document.getElementById("quantity").value = quantity;
+            updateTotal();
+        }
+
+        function updateLimits() {
+            const limit = limits[currentSize];
+            
+            document.getElementById("fruit-limit-text").textContent = `(Escolha até ${limit.fruits})`;
+            document.getElementById("topping-limit-text").textContent = `(Escolha até ${limit.toppings})`;
+
+            validateCheckboxes('fruit-check', limit.fruits);
+            validateCheckboxes('topping-check', limit.toppings);
+        }
+
+        function updateTotal() {
+            const unitPrice = prices[currentType][currentSize];
+            const total = unitPrice * quantity;
+            document.getElementById("total-price").textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
+
+        function validateCheckboxes(className, max) {
+            const checkboxes = document.querySelectorAll('.' + className);
+            let checkedCount = 0;
+            
+            checkboxes.forEach(cb => {
+                if (cb.checked) checkedCount++;
+            });
+
+            // Update icon status
+            const iconId = className === 'fruit-check' ? 'fruit-check-icon' : 'topping-check-icon';
+            const icon = document.getElementById(iconId);
+            if (checkedCount > 0) {
+                icon.style.display = 'block';
+                if (checkedCount === max) icon.className = "fas fa-check-circle text-success";
+                else icon.className = "fas fa-check text-success";
+            } else {
+                icon.style.display = 'none';
+            }
+
+            checkboxes.forEach(cb => {
+                if (!cb.checked) {
+                    cb.disabled = checkedCount >= max;
+                    if (cb.disabled) {
+                        cb.closest('label').classList.add('opacity-50');
+                    } else {
+                        cb.closest('label').classList.remove('opacity-50');
+                    }
+                } else {
+                    cb.disabled = false;
+                    cb.closest('label').classList.remove('opacity-50');
+                }
+            });
+        }
+
+        // Initialize
+        document.addEventListener("DOMContentLoaded", () => {
+            updatePrices(); // Initial render
+            updateLimits();
+
+            document.addEventListener('change', (e) => {
+                if (e.target.classList.contains('fruit-check')) {
+                    const limit = limits[currentSize].fruits;
+                    validateCheckboxes('fruit-check', limit);
+                }
+                if (e.target.classList.contains('topping-check')) {
+                    const limit = limits[currentSize].toppings;
+                    validateCheckboxes('topping-check', limit);
+                }
+            });
+        });
+    </script>
+    <script>
+        function digitsOnly(value) {
+            return (value ?? "").toString().replace(/\D/g, "");
+        }
+
+        function formatCardNumber(value) {
+            const digits = digitsOnly(value).slice(0, 16);
+            const parts = [];
+            for (let i = 0; i < digits.length; i += 4) parts.push(digits.slice(i, i + 4));
+            return parts.join(" ");
+        }
+
+        function formatExpiry(value) {
+            const digits = digitsOnly(value).slice(0, 4);
+            const mm = digits.slice(0, 2);
+            const yy = digits.slice(2, 4);
+            if (digits.length <= 2) return mm;
+            return mm + "/" + yy;
+        }
+
+        function setPaymentMethod(method) {
+            const card = document.getElementById("payment-method-card");
+            const pix = document.getElementById("payment-method-pix");
+            const buttons = document.querySelectorAll(".payment-method-btn");
+
+            buttons.forEach(b => b.classList.toggle("active", b.getAttribute("data-method") === method));
+            if (method === "pix") {
+                card.classList.add("d-none");
+                pix.classList.remove("d-none");
+            } else {
+                pix.classList.add("d-none");
+                card.classList.remove("d-none");
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            const openBtn = document.getElementById("openPaymentModal");
+            const modalEl = document.getElementById("paymentModal");
+            const submitBtn = document.getElementById("paymentSubmit");
+
+            let modalInstance = null;
+            if (window.bootstrap && window.bootstrap.Modal) {
+                modalInstance = new window.bootstrap.Modal(modalEl, { backdrop: false });
+            }
+
+            openBtn?.addEventListener("click", () => {
+                setPaymentMethod("card");
+                if (modalInstance) modalInstance.show();
+            });
+
+            document.querySelectorAll(".payment-method-btn").forEach(btn => {
+                btn.addEventListener("click", () => setPaymentMethod(btn.getAttribute("data-method")));
+            });
+
+            const cardNumber = document.getElementById("cardNumber");
+            const cardExpiry = document.getElementById("cardExpiry");
+            const cardCvv = document.getElementById("cardCvv");
+
+            cardNumber?.addEventListener("input", () => {
+                cardNumber.value = formatCardNumber(cardNumber.value);
+            });
+            cardExpiry?.addEventListener("input", () => {
+                cardExpiry.value = formatExpiry(cardExpiry.value);
+            });
+            cardCvv?.addEventListener("input", () => {
+                cardCvv.value = digitsOnly(cardCvv.value).slice(0, 4);
+            });
+
+            submitBtn?.addEventListener("click", () => {
+                const form = document.getElementById("orderForm");
+                if (form) form.submit();
+            });
+        });
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1); 
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3); 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5); 
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+        }
+
+        .glass-list .list-group-item {
+            transition: all 0.2s;
+        }
+        .glass-list .list-group-item:hover {
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .form-check-input:checked {
+            background-color: #2ecc71;
+            border-color: #2ecc71;
+        }
+
+        .active-size {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-color: #fff;
+        }
+        
+        .opacity-50 {
+            opacity: 0.5;
+            pointer-events: none; /* Optional: prevent interaction if visual cue is strong */
+        }
+    </style>
+}
