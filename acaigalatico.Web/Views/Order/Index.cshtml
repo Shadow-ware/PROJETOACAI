@@ -431,6 +431,10 @@
             const modalEl = document.getElementById("paymentModal");
             const submitBtn = document.getElementById("paymentSubmit");
 
+            // Render authentication state and login URL from server-side
+            const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+            const loginUrl = '@Url.Page("/Account/Login", new { area = "Identity", returnUrl = Url.Action("Index", "Order") })';
+
             let modalInstance = null;
             if (window.bootstrap && window.bootstrap.Modal) {
                 modalInstance = new window.bootstrap.Modal(modalEl, { backdrop: false });
@@ -438,6 +442,11 @@
 
             openBtn?.addEventListener("click", () => {
                 setPaymentMethod("card");
+                if (!isAuthenticated) {
+                    // Redirect guest users to login page (will return back to Order page after successful login)
+                    window.location.href = loginUrl;
+                    return;
+                }
                 if (modalInstance) modalInstance.show();
             });
 
