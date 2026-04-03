@@ -1,0 +1,144 @@
+@model IEnumerable<acaigalatico.Domain.Entities.Cliente>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Gestão de Clientes";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-bold m-0">Gestão de Clientes</h5>
+            <small class="text-muted">Gerencie os clientes e seus saldos devedores</small>
+        </div>
+        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createClienteModal">
+            <i class="fas fa-user-plus me-2"></i> Novo Cliente
+        </button>
+    </div>
+
+    <!-- Modal Create Cliente -->
+    <div class="modal fade" id="createClienteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-user-plus me-2 text-success"></i> Novo Cliente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="CreateCliente" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Nome Completo</label>
+                            <input class="form-control auth-input" name="nome" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Telefone / WhatsApp</label>
+                            <input class="form-control auth-input" name="telefone" placeholder="(00) 00000-0000" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Saldo Devedor (R$)</label>
+                            <input class="form-control auth-input" name="saldoDevedor" placeholder="0,00" />
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">Criar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Saldo Devedor</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var cliente in Model)
+                {
+                    <tr>
+                        <td class="fw-bold">#@cliente.Id</td>
+                        <td>@cliente.Nome</td>
+                        <td>@cliente.Telefone</td>
+                        <td class="fw-bold @(cliente.SaldoDevedor > 0 ? "text-danger" : "text-success")">
+                            R$ @cliente.SaldoDevedor.ToString("N2")
+                        </td>
+
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-light rounded-circle text-primary me-1" title="Editar" data-bs-toggle="modal" data-bs-target="#editCliente_@cliente.Id">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form asp-action="DeleteCliente" method="post" class="d-inline"
+                                      onsubmit="return confirm('Deseja realmente excluir este cliente?')">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@cliente.Id" />
+                                    <button type="submit" class="btn btn-sm btn-light rounded-circle text-danger" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Modal Edit Cliente -->
+                            <div class="modal fade" id="editCliente_@cliente.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title"><i class="fas fa-edit me-2 text-warning"></i> Editar Cliente</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start">
+                                            <form asp-action="EditCliente" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@cliente.Id" />
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Nome Completo</label>
+                                                    <input class="form-control auth-input" name="nome" value="@cliente.Nome" required />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Telefone / WhatsApp</label>
+                                                    <input class="form-control auth-input" name="telefone" value="@cliente.Telefone" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Saldo Devedor (R$)</label>
+                                                    <input class="form-control auth-input" name="saldoDevedor" value="@cliente.SaldoDevedor.ToString("F2")" />
+                                                </div>
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

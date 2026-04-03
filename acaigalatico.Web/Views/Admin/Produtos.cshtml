@@ -1,0 +1,158 @@
+@model IEnumerable<acaigalatico.Application.DTOs.ProdutoDTO>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Gestão de Produtos";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-bold m-0">Gestão de Cardápio</h5>
+            <small class="text-muted">Gerencie os produtos oferecidos na loja</small>
+        </div>
+        <button type="button" class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#createProdutoModal">
+            <i class="fas fa-plus me-2"></i> Novo Produto
+        </button>
+    </div>
+
+    <!-- Modal Create Produto -->
+    <div class="modal fade" id="createProdutoModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title"><i class="fas fa-plus-circle me-2 text-success"></i> Novo Produto</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form asp-action="CreateProduto" method="post">
+                        @Html.AntiForgeryToken()
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Nome do Produto</label>
+                            <input class="form-control auth-input" name="nome" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Descrição</label>
+                            <textarea class="form-control auth-input" name="descricao"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Preço de Venda (R$)</label>
+                            <input class="form-control auth-input" name="precoVenda" placeholder="0,00" required />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">Estoque Atual</label>
+                            <input type="number" class="form-control auth-input" name="estoqueAtual" value="0" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white-50">URL da Imagem</label>
+                            <input class="form-control auth-input" name="imagemUrl" placeholder="/images/produtos/default.png" />
+                        </div>
+                        <div class="d-flex gap-2 justify-content-end">
+                            <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                            <button type="submit" class="btn btn-primary rounded-pill px-4">Criar</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-exclamation-circle me-2"></i> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th>Imagem</th>
+                    <th>Nome</th>
+                    <th>Preço</th>
+                    <th>Estoque</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var produto in Model)
+                {
+                    <tr>
+                        <td>
+                            <div class="rounded-3 border overflow-hidden" style="width: 50px; height: 50px;">
+                                <img src="@produto.ImagemUrl" alt="@produto.Nome" class="w-100 h-100" style="object-fit: cover;" onerror="this.src='/images/produtos/default.png'" />
+                            </div>
+                        </td>
+                        <td class="fw-bold">@produto.Nome</td>
+                        <td class="text-success">R$ @(produto.PrecoVenda?.ToString("N2") ?? "0,00")</td>
+                        <td>@produto.EstoqueAtual</td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-light rounded-circle text-primary me-1" title="Editar" data-bs-toggle="modal" data-bs-target="#editProduto_@produto.Id">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <form asp-action="DeleteProduto" asp-route-id="@produto.Id" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir este produto?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-light rounded-circle text-danger" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <!-- Modal Edit Produto -->
+                            <div class="modal fade" id="editProduto_@produto.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title"><i class="fas fa-edit me-2 text-warning"></i> Editar Produto</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start">
+                                            <form asp-action="EditProduto" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@produto.Id" />
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Nome do Produto</label>
+                                                    <input class="form-control auth-input" name="nome" value="@produto.Nome" required />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Descrição</label>
+                                                    <textarea class="form-control auth-input" name="descricao">@produto.Descricao</textarea>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Preço de Venda (R$)</label>
+                                                    <input class="form-control auth-input" name="precoVenda" value="@(produto.PrecoVenda?.ToString("N2") ?? "0,00")" required />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Estoque Atual</label>
+                                                    <input type="number" class="form-control auth-input" name="estoqueAtual" value="@produto.EstoqueAtual" />
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">URL da Imagem</label>
+                                                    <input class="form-control auth-input" name="imagemUrl" value="@produto.ImagemUrl" />
+                                                </div>
+                                                <div class="d-flex gap-2 justify-content-end">
+                                                    <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
