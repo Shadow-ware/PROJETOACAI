@@ -1,0 +1,32 @@
+@model List<acaigalatico.Web.Controllers.CarrinhoController.CartItem>
+<div class="auth-page">
+    <div class="auth-card">
+        <h3 class="fw-bold mb-4 d-flex align-items-center"><i class="fas fa-shopping-cart me-2 text-warning"></i> Carrinho</h3>
+        <div class="list-group">
+            @foreach (var item in Model)
+            {
+                <div class="list-group-item bg-transparent border-0 d-flex align-items-center mb-3 p-0">
+                    <img src="@item.ImagemUrl" class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;">
+                    <div class="flex-grow-1">
+                        <div class="fw-bold">@item.Nome</div>
+                        <div class="text-white-50">Quantidade: @item.Quantidade</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="h5 m-0 text-warning">R$ @(item.Preco.ToString("0.00").Replace('.', ','))</div>
+                        <a class="btn btn-sm btn-outline-danger rounded-pill mt-2"><i class="fas fa-trash me-1"></i> Remover</a>
+                    </div>
+                </div>
+            }
+        </div>
+        @{
+            var total = Model.Sum(i => i.Preco * i.Quantidade);
+        }
+        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top border-secondary">
+            <div class="h5 m-0">Total</div>
+            <div class="h4 m-0 text-warning">R$ @(total.ToString("0.00").Replace('.', ','))</div>
+        </div>
+        <div class="d-grid mt-3">
+            <a asp-controller="Order" asp-action="Index" class="btn btn-primary rounded-pill py-2 fw-bold">Finalizar Pedido</a>
+        </div>
+    </div>
+</div>

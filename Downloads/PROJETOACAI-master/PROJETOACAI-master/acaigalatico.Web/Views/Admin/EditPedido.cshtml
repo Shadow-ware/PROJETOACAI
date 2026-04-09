@@ -1,0 +1,58 @@
+@model acaigalatico.Domain.Entities.Venda
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Editar Pedido";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="fw-bold m-0">Editar Pedido #@Model.Id</h5>
+        <a asp-action="Pedidos" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Voltar</a>
+    </div>
+
+    <form asp-action="EditPedido" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+        
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label fw-bold">Cliente</label>
+                <input type="text" class="form-control rounded-pill bg-light" value="@(Model.Cliente?.Nome ?? "Cliente Avulso")" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="Status" class="form-label fw-bold">Status do Pedido</label>
+                <select asp-for="Status" class="form-select rounded-pill" asp-items="Html.GetEnumSelectList<acaigalatico.Domain.Entities.StatusVenda>()"></select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ValorTotal" class="form-label fw-bold">Valor Total</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3">R$</span>
+                    <input asp-for="ValorTotal" class="form-control border-start-0 rounded-end-pill pe-3" />
+                </div>
+                <span asp-validation-for="ValorTotal" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="BairroEntrega" class="form-label fw-bold">Bairro</label>
+                <input asp-for="BairroEntrega" class="form-control rounded-pill" />
+                <span asp-validation-for="BairroEntrega" class="text-danger"></span>
+            </div>
+            <div class="col-md-12">
+                <label asp-for="EnderecoEntrega" class="form-label fw-bold">Endereço de Entrega</label>
+                <input asp-for="EnderecoEntrega" class="form-control rounded-pill" />
+                <span asp-validation-for="EnderecoEntrega" class="text-danger"></span>
+            </div>
+            <div class="col-md-12">
+                <label asp-for="Observacao" class="form-label fw-bold">Observação</label>
+                <textarea asp-for="Observacao" class="form-control rounded-4" rows="3"></textarea>
+                <span asp-validation-for="Observacao" class="text-danger"></span>
+            </div>
+
+            <div class="col-12 mt-4">
+                <button type="submit" class="btn btn-primary rounded-pill px-4 shadow">
+                    <i class="fas fa-save me-2"></i> Atualizar Pedido
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

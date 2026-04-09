@@ -1,0 +1,107 @@
+@model acaigalatico.Application.DTOs.ProdutoDTO
+
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Novo Produto";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="fw-bold m-0">Cadastrar Novo Produto</h4>
+        <p class="text-muted small m-0">Preencha os dados abaixo para adicionar ao cardápio</p>
+    </div>
+    <a asp-controller="Admin" asp-action="Produtos" class="btn btn-light rounded-pill px-4 border">
+        <i class="fas fa-arrow-left me-2"></i> Voltar para Lista
+    </a>
+</div>
+
+<div class="admin-card p-4">
+    <form asp-action="Create">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-4 p-3 bg-danger bg-opacity-10 rounded border border-danger border-opacity-25"></div>
+
+        <div class="row g-4">
+            <!-- Informações Básicas -->
+            <div class="col-md-8">
+                <div class="row g-3">
+                    <div class="col-md-12">
+                        <label asp-for="Nome" class="form-label fw-bold small text-uppercase text-muted">Nome do Produto</label>
+                        <input asp-for="Nome" class="form-control rounded-pill px-3" placeholder="Ex: Açaí Galáctico 500ml" />
+                        <span asp-validation-for="Nome" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="CategoriaId" class="form-label fw-bold small text-uppercase text-muted">Categoria</label>
+                        <select asp-for="CategoriaId" class="form-select rounded-pill px-3" asp-items="ViewBag.CategoriaId">
+                            <option value="">-- Selecione uma Categoria --</option>
+                        </select>
+                        <span asp-validation-for="CategoriaId" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="ImagemUrl" class="form-label fw-bold small text-uppercase text-muted">URL da Imagem</label>
+                        <input asp-for="ImagemUrl" class="form-control rounded-pill px-3" placeholder="/images/default-acai.png" />
+                        <span asp-validation-for="ImagemUrl" class="text-danger small"></span>
+                    </div>
+
+                    <div class="col-md-12">
+                        <label asp-for="Descricao" class="form-label fw-bold small text-uppercase text-muted">Descrição</label>
+                        <textarea asp-for="Descricao" class="form-control rounded-4 px-3" rows="4" placeholder="Detalhes do produto..."></textarea>
+                        <span asp-validation-for="Descricao" class="text-danger small"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preços e Estoque -->
+            <div class="col-md-4">
+                <div class="bg-light p-4 rounded-4 border border-opacity-10 h-100">
+                    <h6 class="fw-bold mb-3 text-uppercase small text-muted">Preços e Inventário</h6>
+                    
+                    <div class="mb-3">
+                        <label asp-for="PrecoVenda" class="form-label fw-bold small">Preço de Venda</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3 text-muted">R$</span>
+                            <input asp-for="PrecoVenda" class="form-control border-start-0 rounded-end-pill pe-3" placeholder="0,00" />
+                        </div>
+                        <span asp-validation-for="PrecoVenda" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="PrecoCusto" class="form-label fw-bold small">Preço de Custo</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0 rounded-start-pill ps-3 text-muted">R$</span>
+                            <input asp-for="PrecoCusto" class="form-control border-start-0 rounded-end-pill pe-3" placeholder="0,00" />
+                        </div>
+                        <span asp-validation-for="PrecoCusto" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label asp-for="EstoqueAtual" class="form-label fw-bold small">Estoque Atual</label>
+                            <input asp-for="EstoqueAtual" class="form-control rounded-pill px-3" type="number" />
+                        </div>
+                        <div class="col-6">
+                            <label asp-for="EstoqueMinimo" class="form-label fw-bold small">Estoque Mín.</label>
+                            <input asp-for="EstoqueMinimo" class="form-control rounded-pill px-3" type="number" />
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mt-4">
+                        <input asp-for="Ativo" class="form-check-input" type="checkbox" checked>
+                        <label asp-for="Ativo" class="form-check-label fw-bold small">Produto Ativo</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-5">
+            <button type="reset" class="btn btn-light rounded-pill px-4 border">Limpar</button>
+            <button type="submit" class="btn btn-purple rounded-pill px-5 text-white fw-bold" style="background: var(--admin-purple);">
+                <i class="fas fa-save me-2"></i> Salvar Produto
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,204 @@
+Acabamos de integrar o **SendGrid** no projeto ASP.NET Core MVC "Açaí Galáctico".
+
+Quero que você valide na prática se o envio de e-mails está funcionando.
+
+---
+
+## 🎯 OBJETIVO
+
+Rodar a aplicação e testar o formulário de contato com envio real de e-mail.
+
+---
+
+## 🧪 PASSOS
+
+1. Execute a aplicação ASP.NET Core
+2. Acesse a página de contato
+3. Preencha o formulário com dados de teste
+4. Clique em "Enviar"
+
+---
+
+## ✅ VALIDAR
+
+* O formulário envia sem erro?
+* O EmailService é chamado?
+* O e-mail chega em: **[liuliuvks@gmail.com](mailto:liuliuvks@gmail.com)**
+* Exibe mensagem de sucesso?
+* Limpa o formulário?
+
+---
+
+## ❌ SE NÃO FUNCIONAR
+
+* Identifique o erro (API Key, configuração, service, etc.)
+* Corrija o problema
+* Mostre o código corrigido
+
+---
+
+## ⚠️ REGRAS
+
+* Não simular envio (tem que ser real)
+* Não alterar layout
+* Validar fluxo completo (front → backend → SendGrid → email)
+
+---
+
+## 📌 RESPOSTA ESPERADA
+
+* Funcionou ou não
+* Se o e-mail chegou
+* Erro encontrado (se houver)
+* Correção aplicada (com código)
+@model IEnumerable<acaigalatico.Domain.Entities.Venda>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Pedidos";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h5 class="fw-bold m-0">Gestão de Pedidos</h5>
+            <small class="text-muted">Acompanhe os pedidos em andamento e o histórico de vendas</small>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data/Hora</th>
+                    <th>Cliente</th>
+                    <th>Endereço / Bairro</th>
+                    <th>Status</th>
+                    <th>Total</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pedido in Model.OrderByDescending(p => p.DataVenda))
+                {
+                    <tr>
+                        <td class="fw-bold">#@pedido.Id</td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span>@pedido.DataVenda.ToString("dd/MM/yyyy")</span>
+                                <small class="text-muted">@pedido.DataVenda.ToString("HH:mm")</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px;">
+                                    <i class="fas fa-user text-muted" style="font-size: 0.8rem;"></i>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span>@(pedido.Cliente?.Nome ?? "Cliente Avulso")</span>
+                                    @if (!string.IsNullOrEmpty(pedido.Cliente?.Telefone))
+                                    {
+                                        <small class="text-muted">@pedido.Cliente.Telefone</small>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex flex-column">
+                                <span>@pedido.EnderecoEntrega</span>
+                                <small class="text-muted">@pedido.BairroEntrega</small>
+                            </div>
+                        </td>
+                        <td>
+                            @{
+                                string badgeClass = pedido.Status switch {
+                                    StatusVenda.Pendente => "bg-warning text-dark",
+                                    StatusVenda.Preparando => "bg-info",
+                                    StatusVenda.SaiuParaEntrega => "bg-primary",
+                                    StatusVenda.Entregue => "bg-success",
+                                    StatusVenda.Cancelado => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge rounded-pill @badgeClass">@pedido.Status</span>
+                        </td>
+                        <td class="fw-bold text-success">R$ @pedido.ValorTotal.ToString("N2")</td>
+                        <td class="text-end">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-light rounded-circle text-primary me-1" title="Gerenciar" data-bs-toggle="modal" data-bs-target="#editPedido_@pedido.Id">
+                                    <i class="fas fa-tasks"></i>
+                                </button>
+                                <form asp-action="DeletePedido" asp-route-id="@pedido.Id" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir este pedido do histórico?')">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-sm btn-light rounded-circle text-danger" title="Excluir">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="modal fade" id="editPedido_@pedido.Id" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered">
+                                    <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                                        <div class="modal-header border-0">
+                                            <h5 class="modal-title"><i class="fas fa-tasks me-2 text-warning"></i> Gerenciar Pedido #@pedido.Id</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body text-start">
+                                            <form asp-action="EditPedido" method="post">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@pedido.Id" />
+                                                
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Alterar Status</label>
+                                                    <select class="form-select auth-input" name="status">
+                                                        @foreach (var s in Enum.GetNames(typeof(StatusVenda)))
+                                                        {
+                                                            <option value="@s" selected="@(pedido.Status.ToString()==s)">@s</option>
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Valor Total (R$)</label>
+                                                    <input class="form-control auth-input" name="valorTotal" value="@pedido.ValorTotal.ToString("F2")" />
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Endereço de Entrega</label>
+                                                    <input class="form-control auth-input" name="enderecoEntrega" value="@pedido.EnderecoEntrega" />
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Bairro</label>
+                                                    <input class="form-control auth-input" name="bairroEntrega" value="@pedido.BairroEntrega" />
+                                                </div>
+
+                                                <div class="mb-3">
+                                                    <label class="form-label text-white-50">Observação do Pedido</label>
+                                                    <textarea class="form-control auth-input" name="observacao" rows="3">@pedido.Observacao</textarea>
+                                                </div>
+
+                                                <div class="d-flex gap-2 justify-content-end mt-4">
+                                                    <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-primary rounded-pill px-4">Atualizar Pedido</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
