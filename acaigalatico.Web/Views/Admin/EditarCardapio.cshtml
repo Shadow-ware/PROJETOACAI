@@ -1,0 +1,204 @@
+@model acaigalatico.Domain.Entities.ConteudoCardapio
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Editar Cardápio";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h5 class="fw-bold m-0"><i class="fas fa-utensils me-2 text-primary"></i> Editar Cardápio</h5>
+            <small class="text-muted">Personalize os preços e categorias do layout original</small>
+        </div>
+        <a asp-controller="Products" asp-action="Index" target="_blank" class="btn btn-outline-primary rounded-pill px-4">
+            <i class="fas fa-eye me-2"></i> Ver Site
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <form asp-action="EditarCardapio" method="post" enctype="multipart/form-data">
+        <input type="hidden" asp-for="BackgroundImage" />
+
+        <div class="row">
+            <!-- Coluna 1: Categorias e Preços -->
+            <div class="col-lg-8">
+                <!-- Tradicional -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fas fa-sun me-2"></i> @Model.TradicionalTitulo</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Título da Categoria</label>
+                            <input asp-for="TradicionalTitulo" class="form-control rounded-3" />
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 300ml</label>
+                                <input asp-for="TradicionalPreco300ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 400ml</label>
+                                <input asp-for="TradicionalPreco400ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 500ml</label>
+                                <input asp-for="TradicionalPreco500ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 700ml</label>
+                                <input asp-for="TradicionalPreco700ml" class="form-control rounded-3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trufado -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fas fa-ice-cream me-2"></i> @Model.TrufadoTitulo</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Título</label>
+                                <input asp-for="TrufadoTitulo" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Subtítulo</label>
+                                <input asp-for="TrufadoSubtitulo" class="form-control rounded-3" />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 300ml</label>
+                                <input asp-for="TrufadoPreco300ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 400ml</label>
+                                <input asp-for="TrufadoPreco400ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 500ml</label>
+                                <input asp-for="TrufadoPreco500ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 700ml</label>
+                                <input asp-for="TrufadoPreco700ml" class="form-control rounded-3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gourmet -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fas fa-gem me-2"></i> @Model.GourmetTitulo</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Título</label>
+                                <input asp-for="GourmetTitulo" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label small fw-bold">Subtítulo</label>
+                                <input asp-for="GourmetSubtitulo" class="form-control rounded-3" />
+                            </div>
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 300ml</label>
+                                <input asp-for="GourmetPreco300ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 400ml</label>
+                                <input asp-for="GourmetPreco400ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 500ml</label>
+                                <input asp-for="GourmetPreco500ml" class="form-control rounded-3" />
+                            </div>
+                            <div class="col-6 col-md-3">
+                                <label class="form-label small">Preço 700ml</label>
+                                <input asp-for="GourmetPreco700ml" class="form-control rounded-3" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Coluna 2: Regras e Configurações -->
+            <div class="col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fas fa-list-ol me-2"></i> Monte Seu Açaí</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Título da Seção</label>
+                            <input asp-for="MonteSeuAcaiTitulo" class="form-control rounded-3" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Regras 300ml</label>
+                            <input asp-for="Regras300ml" class="form-control rounded-3" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Regras 400ml</label>
+                            <input asp-for="Regras400ml" class="form-control rounded-3" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Regras 500ml</label>
+                            <input asp-for="Regras500ml" class="form-control rounded-3" />
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Regras 700ml</label>
+                            <input asp-for="Regras700ml" class="form-control rounded-3" />
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label small fw-bold">Texto Adicionais Extras</label>
+                            <input asp-for="AdicionaisExtrasTexto" class="form-control rounded-3" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm rounded-4 mb-4">
+                    <div class="card-header bg-transparent border-0 pt-4 px-4">
+                        <h6 class="fw-bold m-0 text-primary"><i class="fas fa-image me-2"></i> Imagem de Fundo</h6>
+                    </div>
+                    <div class="card-body p-4">
+                        <input type="file" name="backgroundFile" class="form-control rounded-3 mb-3" accept="image/*" onchange="previewImage(this, 'previewBg')" />
+                        <div class="text-center">
+                            <img id="previewBg" src="@Model.BackgroundImage" class="rounded-3 w-100 shadow-sm" style="max-height: 150px; object-fit: cover;">
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow">
+                    <i class="fas fa-save me-2"></i> SALVAR ALTERAÇÕES
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function previewImage(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById(previewId).src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}

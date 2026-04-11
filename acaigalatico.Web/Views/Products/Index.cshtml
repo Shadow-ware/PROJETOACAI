@@ -1,0 +1,180 @@
+@model acaigalatico.Domain.Entities.ConteudoCardapio
+@{
+    ViewData["Title"] = "Cardápio";
+}
+
+<div class="menu-page" style="background: url('@Model.BackgroundImage') fixed center center/cover; min-height: 100vh; padding: 40px 20px; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif;">
+    
+    <!-- Main Container -->
+    <div class="menu-outer-card" style="max-width: 950px; width: 100%; background: rgba(20, 20, 30, 0.85); backdrop-filter: blur(20px); border-radius: 40px; border: 1px solid rgba(255, 255, 255, 0.1); padding: 50px; position: relative; box-shadow: 0 25px 50px rgba(0,0,0,0.6);">
+        
+        <!-- Top Section: Logo & Title -->
+        <div class="text-center mb-5">
+            <img src="/images/logo-sem-escrita.png" style="height: 70px; filter: drop-shadow(0 0 15px rgba(224, 86, 253, 0.6));" class="mb-3 animate__animated animate__pulse animate__infinite">
+            <h1 class="display-4 fw-bold mb-1 text-white" style="letter-spacing: 5px; text-transform: uppercase;">
+                AÇAÍ <span style="color: #e056fd; text-shadow: 0 0 20px rgba(224, 86, 253, 0.8);">GALÁCTICO</span>
+            </h1>
+            <div class="stars-container">
+                <i class="fas fa-star text-warning small"></i>
+                <i class="fas fa-star text-warning mx-1"></i>
+                <i class="fas fa-star text-warning small"></i>
+            </div>
+        </div>
+
+        <div class="row g-5">
+            <!-- Left Column: Categories and Prices -->
+            <div class="col-lg-7">
+                
+                <!-- Tradicional -->
+                <div class="category-block mb-5">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-sun text-warning me-3 fs-4"></i>
+                        <h2 class="h4 fw-bold text-white mb-0 text-uppercase" style="letter-spacing: 1px;">@Model.TradicionalTitulo</h2>
+                        <div class="flex-grow-1 ms-3" style="height: 1px; background: rgba(255,255,255,0.2);"></div>
+                    </div>
+                    <div class="price-rows">
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">300 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TradicionalPreco300ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">400 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TradicionalPreco400ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">500 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TradicionalPreco500ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-white-50">700 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TradicionalPreco700ml</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trufado -->
+                <div class="category-block mb-5">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="fas fa-ice-cream text-warning me-3 fs-4"></i>
+                        <h2 class="h4 fw-bold text-white mb-0 text-uppercase" style="letter-spacing: 1px;">@Model.TrufadoTitulo</h2>
+                        <div class="flex-grow-1 ms-3" style="height: 1px; background: rgba(255,255,255,0.2);"></div>
+                    </div>
+                    <p class="text-white-50 small mb-3 fst-italic">@Model.TrufadoSubtitulo</p>
+                    <div class="price-rows">
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">300 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TrufadoPreco300ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">400 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TrufadoPreco400ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">500 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TrufadoPreco500ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-white-50">700 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.TrufadoPreco700ml</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gourmet -->
+                <div class="category-block">
+                    <div class="d-flex align-items-center mb-1">
+                        <i class="fas fa-gem text-warning me-3 fs-4"></i>
+                        <h2 class="h4 fw-bold text-white mb-0 text-uppercase" style="letter-spacing: 1px;">@Model.GourmetTitulo</h2>
+                        <div class="flex-grow-1 ms-3" style="height: 1px; background: rgba(255,255,255,0.2);"></div>
+                    </div>
+                    <p class="text-white-50 small mb-3 fst-italic">@Model.GourmetSubtitulo</p>
+                    <div class="price-rows">
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">300 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.GourmetPreco300ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">400 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.GourmetPreco400ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2 border-bottom border-white border-opacity-10">
+                            <span class="text-white-50">500 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.GourmetPreco500ml</span>
+                        </div>
+                        <div class="d-flex justify-content-between py-2">
+                            <span class="text-white-50">700 ml</span>
+                            <span class="text-white fw-bold">R$ @Model.GourmetPreco700ml</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Monte Seu Açaí Card -->
+            <div class="col-lg-5">
+                <div class="monte-seu-acai-card p-4" style="background: #efefff; border-radius: 30px; border: 4px solid #e056fd; box-shadow: 0 0 20px rgba(224, 86, 253, 0.4); height: 100%; display: flex; flex-direction: column;">
+                    <h3 class="text-center fw-bold mb-4 text-uppercase" style="color: #4834d4; letter-spacing: 1px;">@Model.MonteSeuAcaiTitulo</h3>
+                    
+                    <div class="rule-box mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                        <p class="fw-bold mb-1" style="color: #4834d4;">300 ml:</p>
+                        <p class="mb-0 text-dark" style="font-size: 0.95rem;">@Model.Regras300ml</p>
+                    </div>
+
+                    <div class="rule-box mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                        <p class="fw-bold mb-1" style="color: #4834d4;">400 ml:</p>
+                        <p class="mb-0 text-dark" style="font-size: 0.95rem;">@Model.Regras400ml</p>
+                    </div>
+
+                    <div class="rule-box mb-4 pb-3 border-bottom border-secondary border-opacity-25">
+                        <p class="fw-bold mb-1" style="color: #4834d4;">500 ml:</p>
+                        <p class="mb-0 text-dark" style="font-size: 0.95rem;">@Model.Regras500ml</p>
+                    </div>
+
+                    <div class="rule-box mb-4">
+                        <p class="fw-bold mb-1" style="color: #4834d4;">700 ml:</p>
+                        <p class="mb-0 text-dark" style="font-size: 0.95rem;">@Model.Regras700ml</p>
+                    </div>
+
+                    <div class="mt-auto text-center pt-3 border-top border-secondary border-opacity-25">
+                        <p class="fw-bold text-uppercase mb-4" style="color: #4834d4; font-size: 0.7rem; letter-spacing: 1px;">@Model.AdicionaisExtrasTexto</p>
+                        
+                        <a asp-controller="Order" asp-action="Index" class="btn btn-primary w-100 rounded-pill fw-bold py-3 shadow-lg animate__animated animate__pulse animate__infinite" style="background: linear-gradient(45deg, #4834d4, #686de0); border: none;">
+                            <i class="fas fa-rocket me-2"></i> PEDIR AGORA
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+    
+    .menu-page {
+        overflow-x: hidden;
+    }
+    
+    .price-rows span {
+        font-size: 1.1rem;
+    }
+
+    .monte-seu-acai-card {
+        transition: transform 0.3s ease;
+    }
+
+    .monte-seu-acai-card:hover {
+        transform: scale(1.02);
+    }
+
+    /* Scrollbar customized for the page */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+        background: #000;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #e056fd;
+        border-radius: 10px;
+    }
+</style>

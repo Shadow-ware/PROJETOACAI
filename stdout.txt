@@ -1,0 +1,3 @@
+Usando as configurações de inicialização de acaigalatico.Web\Properties\launchSettings.json...
+warn: Microsoft.EntityFrameworkCore.Model[10632]
+      No instantiatable types implementing `IEntityTypeConfiguration` were found while scanning assembly 'acaigalatico.Infrastructure, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null'.

@@ -1,0 +1,111 @@
+using acaigalatico.Application.Interfaces;
+using acaigalatico.Infrastructure.Context;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace acaigalatico.Web.Controllers
+{
+    public class ProductsController : Controller
+    {
+        private readonly IProdutoService _produtoService;
+        private readonly ICategoriaService _categoriaService;
+        private readonly IConteudoSiteService _conteudoService;
+        private readonly AppDbContext _context;
+
+        public ProductsController(IProdutoService produtoService, ICategoriaService categoriaService, IConteudoSiteService conteudoService, AppDbContext context)
+        {
+            _produtoService = produtoService;
+            _categoriaService = categoriaService;
+            _conteudoService = conteudoService;
+            _context = context;
+        }
+
+        [HttpGet]
+        [Route("Cardapio")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
+        {
+            var conteudo = _conteudoService.GetCardapioConteudo();
+            return View(conteudo);
+        }
+
+        [HttpGet]
+        [Route("Admin/Produtos/Novo")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create()
+        {
+            ViewBag.CategoriaId = new SelectList(await _categoriaService.GetCategoriasAsync(), "Id", "Nome");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create(acaigalatico.Application.DTOs.ProdutoDTO produtoDto)
+        {
+            if (ModelState.IsValid)
+            {
+                await _produtoService.AddAsync(produtoDto);
+                TempData["SuccessMessage"] = "Produto criado com sucesso!";
+                return RedirectToAction("Produtos", "Admin");
+            }
+            ViewBag.CategoriaId = new SelectList(await _categoriaService.GetCategoriasAsync(), "Id", "Nome", produtoDto.CategoriaId);
+            return View(produtoDto);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null) return NotFound();
+
+            var produtoDto = await _produtoService.GetByIdAsync(id);
+
+            if (produtoDto == null) return NotFound();
+
+            ViewBag.CategoriaId = new SelectList(await _categoriaService.GetCategoriasAsync(), "Id", "Nome", produtoDto.CategoriaId);
+            return View(produtoDto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Edit(acaigalatico.Application.DTOs.ProdutoDTO produtoDto)
+        {
+            if (ModelState.IsValid)
+            {
+                await _produtoService.UpdateAsync(produtoDto);
+                TempData["SuccessMessage"] = "Produto atualizado com sucesso!";
+                return RedirectToAction("Produtos", "Admin");
+            }
+            ViewBag.CategoriaId = new SelectList(await _categoriaService.GetCategoriasAsync(), "Id", "Nome", produtoDto.CategoriaId);
+            return View(produtoDto);
+        }
+
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int? id)
+        {
+            if (id == null) return NotFound();
+            var produtoDto = await _produtoService.GetByIdAsync(id);
+            if (produtoDto == null) return NotFound();
+            return View(produtoDto);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _produtoService.RemoveAsync(id);
+            TempData["SuccessMessage"] = "Produto removido com sucesso!";
+            return RedirectToAction("Produtos", "Admin");
+        }
+    }
+}

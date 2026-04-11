@@ -1,0 +1,118 @@
+@model List<acaigalatico.Web.Controllers.PedidosController.PedidoVm>
+@{
+    ViewData["Title"] = "Meus Pedidos";
+}
+
+<div class="container py-5" style="margin-top: 80px;">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="glass-card p-4 p-md-5">
+                <div class="d-flex align-items-center justify-content-between mb-4 border-bottom border-white-10 pb-3">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-warning rounded-circle p-3 me-3">
+                            <i class="fas fa-briefcase text-dark fs-4"></i>
+                        </div>
+                        <div>
+                            <h2 class="fw-bold mb-0 text-white">Meus Pedidos</h2>
+                            <p class="text-white-50 mb-0">Acompanhe o histórico e status das suas compras</p>
+                        </div>
+                    </div>
+                    <a asp-controller="Order" asp-action="Index" class="btn btn-warning rounded-pill px-4 fw-bold shadow-sm">
+                        <i class="fas fa-plus me-2"></i> Novo Pedido
+                    </a>
+                </div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <div class="table-responsive rounded-4 overflow-hidden border border-white-10">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead class="bg-white bg-opacity-10">
+                            <tr>
+                                <th class="border-0 small uppercase text-white-50 p-3">Nº Pedido</th>
+                                <th class="border-0 small uppercase text-white-50 p-3">Data e Hora</th>
+                                <th class="border-0 small uppercase text-white-50 p-3">Status Atual</th>
+                                <th class="border-0 small uppercase text-white-50 p-3 text-end">Valor Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                @foreach (var p in Model)
+                                {
+                                    <tr style="background: rgba(255,255,255,0.02); transition: all 0.2s ease;">
+                                        <td class="p-3 fw-bold border-white-10 text-white">#@p.Numero</td>
+                                        <td class="p-3 border-white-10 text-white-50">@p.Data.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td class="p-3 border-white-10">
+                                            @{
+                                                var badgeClass = p.Status switch {
+                                                    "Entregue" => "bg-success",
+                                                    "Em andamento" => "bg-info text-white",
+                                                    "Novo pedido" => "bg-warning text-dark",
+                                                    "Saiu para entrega" => "bg-primary",
+                                                    _ => "bg-secondary"
+                                                };
+                                            }
+                                            <span class="badge rounded-pill @badgeClass px-3 py-2">
+                                                <i class="fas @(p.Status == "Em andamento" ? "fa-spinner fa-spin" : "fa-circle") me-1 small"></i>
+                                                @p.Status
+                                            </span>
+                                        </td>
+                                        <td class="p-3 text-end text-warning fw-bold border-white-10 h5 mb-0">R$ @p.ValorTotal.ToString("0.00").Replace('.', ',')</td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4" class="text-center text-white-50 py-5 border-0">
+                                        <div class="mb-3">
+                                            <i class="fas fa-box-open fs-1 text-white-10"></i>
+                                        </div>
+                                        Você ainda não possui pedidos cadastrados. <br>
+                                        <a asp-controller="Order" asp-action="Index" class="text-warning text-decoration-none mt-2 d-inline-block fw-bold">
+                                            Explorar o cardápio e fazer meu primeiro pedido! 🚀
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        color: white;
+    }
+
+    .border-white-10 {
+        border-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .text-white-10 {
+        color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .uppercase {
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .table-hover tbody tr:hover {
+        background: rgba(255, 255, 255, 0.08) !important;
+        transform: scale(1.005);
+    }
+</style>

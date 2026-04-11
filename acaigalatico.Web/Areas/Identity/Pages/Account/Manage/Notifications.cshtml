@@ -1,0 +1,82 @@
+@page
+@model acaigalatico.Web.Areas.Identity.Pages.Account.Manage.NotificationsModel
+@{
+    ViewData["Title"] = "Notificações";
+}
+
+<div class="position-relative" style="min-height: 100vh; padding-top: 130px; padding-bottom: 60px; background: url('/images/galaxiaa.jpg?v=2') no-repeat center center/cover;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 0;"></div>
+    <div class="container position-relative" style="z-index: 1;">
+    <div class="row g-4">
+        <div class="col-xl-4">
+        <div class="glass-card p-4" style="border-radius: 20px;">
+            <div class="d-flex align-items-center mb-3">
+                <div class="me-3" style="width: 60px; height: 60px; border-radius: 50%; background:#2d5a27; display:flex; align-items:center; justify-content:center; box-shadow:0 8px 22px rgba(45,90,39,.35);">
+                    <i class="fas fa-user text-white" style="font-size: 22px;"></i>
+                </div>
+                <div>
+                    <div class="text-white fw-bold">@User.Identity?.Name</div>
+                    <small class="text-white-50">Preferências de notificação</small>
+                </div>
+            </div>
+            <hr class="border-secondary border-opacity-50">
+            <ul class="list-unstyled m-0">
+                <li class="d-flex justify-content-between align-items-center py-2">
+                    <a class="text-white text-decoration-none d-flex justify-content-between w-100" asp-area="Identity" asp-page="/Account/Manage/Index">
+                        <span><i class="fas fa-id-badge me-2 text-warning"></i> Meu Perfil</span>
+                        <i class="fas fa-chevron-right text-white-50"></i>
+                    </a>
+                </li>
+                <li class="d-flex justify-content-between align-items-center py-2">
+                    <a class="text-white text-decoration-none d-flex justify-content-between w-100" asp-area="Identity" asp-page="/Account/Manage/Settings">
+                        <span><i class="fas fa-cog me-2 text-warning"></i> Configurações</span>
+                        <i class="fas fa-chevron-right text-white-50"></i>
+                    </a>
+                </li>
+                <li class="d-flex justify-content-between align-items-center py-2">
+                    <a class="text-white text-decoration-none d-flex justify-content-between w-100" asp-area="Identity" asp-page="/Account/Manage/Notifications">
+                        <span><i class="fas fa-bell me-2 text-warning"></i> Notificações</span>
+                        <i class="fas fa-chevron-right text-white-50"></i>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div class="col-xl-8">
+        <div class="glass-card p-4" style="border-radius: 20px;">
+            <h5 class="text-white fw-bold mb-3"><i class="fas fa-bell text-warning me-2"></i> Notificações</h5>
+            <form method="post">
+                <div class="list-group list-group-flush">
+                    <label class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center">
+                        <span>Promoções e ofertas</span>
+                        <input class="form-check-input" type="checkbox" asp-for="Input.Promotions">
+                    </label>
+                    <label class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center">
+                        <span>Status dos pedidos</span>
+                        <input class="form-check-input" type="checkbox" asp-for="Input.OrderStatus">
+                    </label>
+                    <label class="list-group-item bg-transparent text-white d-flex justify-content-between align-items-center">
+                        <span>Novidades do cardápio</span>
+                        <input class="form-check-input" type="checkbox" asp-for="Input.MenuNews">
+                    </label>
+                </div>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-success rounded-pill px-4">
+                        <i class="fas fa-check me-2"></i> Salvar
+                    </button>
+                </div>
+            </form>
+            @if (TempData["NotificationsSaved"] != null)
+            {
+                <div class="alert alert-success mt-4" role="alert" style="border-radius:12px;">
+                    <i class="fas fa-check-circle me-2"></i> @TempData["NotificationsSaved"]
+                </div>
+            }
+        </div>
+        </div>
+    </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

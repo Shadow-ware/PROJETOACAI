@@ -1,0 +1,126 @@
+@model acaigalatico.Domain.Entities.ConteudoInicio
+@{
+    ViewData["Title"] = "Início";
+}
+
+<!-- Hero Section -->
+<div class="hero-section text-center text-white d-flex align-items-center justify-content-center position-relative" 
+     style="min-height: 100vh; padding-top: 180px; padding-bottom: 120px; background: url('@Model.ImagemUrl') no-repeat center center/cover;">
+    
+    <div class="container position-relative" style="z-index: 1;">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <img src="/images/logo-sem-escrita.png" alt="Açaí Galáctico Logo" class="img-fluid mb-3 animate__animated animate__zoomIn" style="max-height: 150px;">
+                <h1 class="display-1 fw-bold mb-3" style="text-shadow: 0 0 20px #A91079;">
+                    @Model.Titulo
+                </h1>
+                <p class="lead mb-5 fs-3">@Model.Subtitulo</p>
+                
+                <div class="d-flex justify-content-center gap-3 espaco-botao">
+                    <a asp-controller="Order" asp-action="Index" class="btn btn-success btn-lg px-5 py-3 rounded-pill shadow-lg animate__animated animate__pulse animate__infinite">
+                        <i class="fas fa-motorcycle me-2"></i> FAZER PEDIDO
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quem Somos Section -->
+<div id="quem-somos" class="section-padding position-relative" style="background-color: #4a148c; padding-top: 120px; padding-bottom: 120px;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <img src="@Model.SobreImagemUrl" alt="Sobre Nós" class="img-fluid rounded-4 shadow-lg border border-2 border-secondary">
+            </div>
+            <div class="col-md-6 ps-md-5">
+                <h2 class="display-4 fw-bold mb-4">@Model.SobreTitulo</h2>
+                <p class="lead text-white-50">
+                    @Model.SobreDescricao
+                </p>
+                <div class="mt-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                        <span class="fs-5">@Model.Feature1</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="fas fa-bolt text-warning fa-2x me-3"></i>
+                        <span class="fs-5">@Model.Feature2</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-heart text-danger fa-2x me-3"></i>
+                        <span class="fs-5">@Model.Feature3</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Exposição Section -->
+<div id="exposicao" class="section-padding py-5" style="background-color: #311b92; position: relative; padding-bottom: 120px;">
+    <!-- Drip Divider -->
+    <div style="position: absolute; top: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 80px;">
+            <path d="M0,0 L1200,0 L1200,20 C1150,20 1150,90 1100,90 C1050,90 1050,20 1000,20 C950,20 950,110 900,110 C850,110 850,20 800,20 C750,20 750,70 700,70 C650,70 650,20 600,20 C550,20 550,100 500,100 C450,100 450,20 400,20 C350,20 350,80 300,80 C250,80 250,20 200,20 C150,20 150,120 100,120 C50,120 50,20 0,20 Z" fill="#4a148c"></path>
+        </svg>
+    </div>
+
+    <div class="container mt-5">
+        <div class="text-center mb-5 pt-4">
+            <h2 class="display-4 fw-bold text-white">@Model.ExpoTitulo</h2>
+            <p class="text-white-50">@Model.ExpoSubtitulo</p>
+        </div>
+
+        <div class="row g-4">
+            @foreach (var item in Model.ItensExposicao)
+            {
+                <div class="col-md-4">
+                    <div class="card h-100 shadow-sm border-0 bg-dark text-white overflow-hidden rounded-4">
+                        <img src="@item.ImagemUrl" class="card-img-top" alt="@item.Nome" style="height: 250px; object-fit: cover;">
+                        <div class="card-body text-center">
+                            <h5 class="card-title fw-bold">@item.Nome</h5>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Outros Produtos Section -->
+<div class="section-padding" style="background-color: white; position: relative; padding-top: 100px; padding-bottom: 120px;">
+    <!-- Drip Divider (Purple to White) -->
+    <div style="position: absolute; top: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 80px;">
+            <path d="M0,0 L1200,0 L1200,20 C1150,20 1150,90 1100,90 C1050,90 1050,20 1000,20 C950,20 950,110 900,110 C850,110 850,20 800,20 C750,20 750,70 700,70 C650,70 650,20 600,20 C550,20 550,100 500,100 C450,100 450,20 400,20 C350,20 350,80 300,80 C250,80 250,20 200,20 C150,20 150,120 100,120 C50,120 50,20 0,20 Z" fill="#311b92"></path>
+        </svg>
+    </div>
+
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-4 fw-bold" style="color: #4a148c;">@Model.OutrosTitulo</h2>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card h-100 shadow-sm border-0">
+                    <img src="@Model.OutrosImagemUrl" class="card-img-top" alt="Diversos" style="height: 350px; object-fit: cover;">
+                    <div class="card-body text-center">
+                        <p class="card-text text-muted fs-5 fw-bold text-uppercase">@Model.OutrosTextoDestaque</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5 espaco-botao-whatsapp">
+            <div class="glass-card d-inline-block p-4 animate__animated animate__pulse animate__infinite" style="background: #4a148c; border-radius: 20px;">
+                <a href="@Model.WhatsAppLink" target="_blank" class="text-decoration-none text-white">
+                    <i class="fab fa-whatsapp fa-2x me-2"></i> 
+                    <span class="fs-4 fw-bold">@Model.WhatsAppTexto</span>
+                </a>
+                <p class="mb-0 text-white-50 mt-2">@Model.WhatsAppSubtitulo</p>
+            </div>
+        </div>
+    </div>
+</div>
