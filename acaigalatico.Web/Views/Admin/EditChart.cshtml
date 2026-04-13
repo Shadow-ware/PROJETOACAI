@@ -1,0 +1,48 @@
+@model dynamic
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Configurar Gráfico";
+}
+
+<div class="admin-card p-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+        <div>
+            <h5 class="fw-bold m-0"><i class="fas fa-chart-line me-2 text-primary"></i> Configurar Gráfico de Vendas</h5>
+            <small class="text-muted">Ajuste os valores dos últimos 7 dias para visualização progressiva</small>
+        </div>
+        <a asp-action="Index" class="btn btn-sm btn-outline-secondary rounded-pill px-3">
+            <i class="fas fa-arrow-left me-1"></i> Voltar ao Dashboard
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+                <form asp-action="UpdateChart" method="post">
+                    <div class="row g-3">
+                        @for (int i = 0; i < ViewBag.SalesLabels.Count; i++)
+                        {
+                            <div class="col-md-3">
+                                <div class="card border-0 shadow-sm p-3 rounded-3 h-100">
+                                    <label class="form-label fw-bold text-muted small text-uppercase">Dia @ViewBag.SalesLabels[i]</label>
+                                    <input type="hidden" name="labels" value="@ViewBag.SalesLabels[i]" />
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text bg-white border-end-0">R$</span>
+                                        <input type="text" name="values" class="form-control border-start-0" value="@ViewBag.SalesData[i].ToString("N2")" required />
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <hr class="my-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 shadow">
+                            <i class="fas fa-save me-2"></i> Salvar Gráfico
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

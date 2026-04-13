@@ -1,0 +1,157 @@
+@model IEnumerable<acaigalatico.Domain.Entities.Venda>
+@{
+    Layout = "_LayoutAdmin";
+    ViewData["Title"] = "Pedidos";
+
+    string GetStatusLabel(StatusVenda status) => status switch
+    {
+        StatusVenda.Pendente => "Novo pedido",
+        StatusVenda.Preparando => "Em andamento",
+        StatusVenda.SaiuParaEntrega => "Saiu para entrega",
+        StatusVenda.Entregue => "Entregue",
+        StatusVenda.Cancelado => "Cancelado",
+        _ => "Novo pedido"
+    };
+
+    string GetStatusBadgeClass(StatusVenda status) => status switch
+    {
+        StatusVenda.Pendente => "bg-warning text-dark",
+        StatusVenda.Preparando => "bg-info text-white",
+        StatusVenda.SaiuParaEntrega => "bg-primary",
+        StatusVenda.Entregue => "bg-success",
+        StatusVenda.Cancelado => "bg-danger",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="admin-card p-4">
+    <div class="mb-4">
+        <div>
+            <h5 class="fw-bold m-0">Gestão de Pedidos</h5>
+            <small class="text-muted">Visualize e gerencie os pedidos feitos pelos usuários</small>
+        </div>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 rounded-3" role="alert">
+            <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-admin">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Cliente</th>
+                    <th>Total</th>
+                    <th class="text-end">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    @foreach (var pedido in Model.OrderByDescending(p => p.DataVenda))
+                    {
+                        <tr>
+                            <td class="fw-bold">#@pedido.Id</td>
+                            <td>@pedido.DataVenda.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <span class="badge rounded-pill @GetStatusBadgeClass(pedido.Status)">@GetStatusLabel(pedido.Status)</span>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; background: rgba(0,0,0,0.05) !important;">
+                                        <i class="fas fa-user text-muted" style="font-size: 0.8rem;"></i>
+                                    </div>
+                                    <span class="text-dark fw-medium">@(pedido.Cliente?.Nome ?? "Cliente Avulso")</span>
+                                </div>
+                            </td>
+                            <td class="fw-bold text-success h6 mb-0">R$ @(pedido.ValorTotal.ToString("F2").Replace('.', ','))</td>
+                            <td class="text-end">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-light rounded-circle text-primary me-1" title="Atualizar pedido" data-bs-toggle="modal" data-bs-target="#editPedido_@pedido.Id">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form asp-action="DeletePedido" asp-route-id="@pedido.Id" method="post" class="d-inline" onsubmit="return confirm('Deseja realmente excluir este pedido?')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-light rounded-circle text-danger" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+
+                                <div class="modal fade" id="editPedido_@pedido.Id" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog modal-dialog-centered">
+                                        <div class="modal-content" style="background: #2c3e50; color: #fff;">
+                                            <div class="modal-header border-0">
+                                                <h5 class="modal-title"><i class="fas fa-edit me-2 text-warning"></i> Atualizar Pedido</h5>
+                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <form asp-action="EditPedido" method="post">
+                                                    @Html.AntiForgeryToken()
+                                                    <input type="hidden" name="id" value="@pedido.Id" />
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Cliente</label>
+                                                        <select class="form-select auth-input" name="clienteId">
+                                                            <option value="">Cliente Avulso</option>
+                                                            @foreach (var c in (IEnumerable<Cliente>)ViewBag.Clientes)
+                                                            {
+                                                                <option value="@c.Id" selected="@(pedido.ClienteId == c.Id)">@c.Nome</option>
+                                                            }
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Valor Total</label>
+                                                        <input class="form-control auth-input" name="valorTotal" value="@pedido.ValorTotal.ToString("F2")" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Status</label>
+                                                        <select class="form-select auth-input" name="status">
+                                                            <option value="@StatusVenda.Pendente" selected="@(pedido.Status == StatusVenda.Pendente)">Novo pedido</option>
+                                                            <option value="@StatusVenda.Preparando" selected="@(pedido.Status == StatusVenda.Preparando)">Em andamento</option>
+                                                            <option value="@StatusVenda.SaiuParaEntrega" selected="@(pedido.Status == StatusVenda.SaiuParaEntrega)">Saiu para entrega</option>
+                                                            <option value="@StatusVenda.Entregue" selected="@(pedido.Status == StatusVenda.Entregue)">Entregue</option>
+                                                            <option value="@StatusVenda.Cancelado" selected="@(pedido.Status == StatusVenda.Cancelado)">Cancelado</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Endereço</label>
+                                                        <input class="form-control auth-input" name="enderecoEntrega" value="@pedido.EnderecoEntrega" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Bairro</label>
+                                                        <input class="form-control auth-input" name="bairroEntrega" value="@pedido.BairroEntrega" />
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label text-white-50">Observação</label>
+                                                        <textarea class="form-control auth-input" name="observacao">@pedido.Observacao</textarea>
+                                                    </div>
+                                                    <div class="d-flex gap-2 justify-content-end">
+                                                        <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                                                        <button type="submit" class="btn btn-primary rounded-pill px-4">Salvar</button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">Nenhum pedido realizado até o momento.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

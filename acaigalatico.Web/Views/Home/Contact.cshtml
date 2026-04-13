@@ -1,0 +1,177 @@
+@model Dictionary<string, string>
+@{
+    ViewData["Title"] = "Fale Conosco";
+
+    // Função auxiliar para obter conteúdo com fallback
+    string GetContent(string key, string defaultValue) => 
+        Model.ContainsKey(key) ? Model[key] : defaultValue;
+}
+
+<div style="background: url('/images/galaxiaa.jpg?v=2') no-repeat center center/cover; padding-top: 120px; padding-bottom: 80px; position: relative;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 0;"></div>
+    <div class="container position-relative" style="z-index: 1;">
+    <div class="text-center mb-5">
+        <h1 class="display-4 fw-bold">Fale Conosco</h1>
+        <p class="lead text-white-50">Estamos aqui para te atender! Entre em contato ou nos visite. 🌟</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Left Column: Contact Info & Social -->
+        <div class="col-lg-5 d-flex flex-column gap-4">
+            <!-- Contact Info Card -->
+            <div class="glass-card h-100">
+                <h3 class="mb-4">Informações de Contato</h3>
+                
+                <div class="d-flex align-items-center mb-4 contact-item">
+                    <div class="contact-icon-box">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold">Endereço</h6>
+                        <p class="mb-0 text-white-50">@GetContent("Contato_Endereco", "Rua Pedro Ferraz Barreto, 22 - Vila Seabra, São Paulo - SP")</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-4 contact-item">
+                    <div class="contact-icon-box">
+                        <i class="fas fa-phone-alt"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold">Telefone</h6>
+                        <p class="mb-0 text-white-50">@GetContent("Contato_Telefone", "(11) 98259-9249")</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center mb-4 contact-item">
+                    <div class="contact-icon-box">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold">E-mail</h6>
+                        <p class="mb-0 text-white-50">@GetContent("Contato_Email", "contato@acaigalactico.com.br")</p>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-center contact-item">
+                    <div class="contact-icon-box">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div>
+                        <h6 class="mb-1 fw-bold">Sobre nós</h6>
+                        <p class="mb-0 text-white-50">@GetContent("Contato_Text", "Venha nos visitar ou entre em contato pelo WhatsApp!")</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Social Media Card -->
+            <div class="glass-card">
+                <h4 class="mb-4">Redes Sociais</h4>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <a href="https://www.instagram.com/acaiigalactico" target="_blank" class="social-btn-glass">
+                            <i class="fab fa-instagram" style="background: -webkit-linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;"></i>
+                            <small>Instagram</small>
+                        </a>
+                    </div>
+                    <div class="col-6">
+                        <a href="https://wa.me/5511982599249" target="_blank" class="social-btn-glass">
+                            <i class="fab fa-whatsapp text-success"></i>
+                            <small>WhatsApp</small>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Message Form -->
+        <div class="col-lg-6">
+            <div class="glass-card h-100">
+                <h3 class="mb-4">Envie uma Mensagem</h3>
+                
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> @TempData["SuccessMessage"]
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+                
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="background-color: rgba(220, 53, 69, 0.2); color: #ff8787; border: 1px solid rgba(220, 53, 69, 0.5);">
+                        <i class="fas fa-exclamation-triangle me-2"></i> @TempData["ErrorMessage"]
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                }
+
+                <form asp-action="SendMessage" asp-controller="Home" method="post">
+                    <div class="mb-3">
+                        <label for="nome" class="form-label">Nome</label>
+                        <input type="text" class="form-control form-control-glass" id="nome" name="nome" placeholder="Seu nome" required maxlength="70">
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" class="form-control form-control-glass" id="email" name="email" placeholder="seu@email.com" required maxlength="100">
+                    </div>
+                    <div class="mb-3">
+                        <label for="telefone" class="form-label">Telefone</label>
+                        <input type="tel" class="form-control form-control-glass" id="telefone" name="telefone" placeholder="(11) 98259-9249" maxlength="20">
+                    </div>
+                    <div class="mb-3">
+                        <label for="assunto" class="form-label">Assunto</label>
+                        <select class="form-select form-control-glass" id="assunto" name="assunto">
+                            <option value="Dúvida" selected>Dúvida</option>
+                            <option value="Sugestão">Sugestão</option>
+                            <option value="Reclamação">Reclamação</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="mensagem" class="form-label">Mensagem</label>
+                        <textarea class="form-control form-control-glass" id="mensagem" name="mensagem" rows="5" placeholder="Digite sua mensagem..." required maxlength="1000"></textarea>
+                        <div class="form-text text-white-50 text-end" style="font-size: 0.75rem;">Máximo 1000 caracteres</div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-bold" style="background: linear-gradient(90deg, #9b59b6, #e056fd); border: none;">
+                        Enviar Mensagem 🚀
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+
+<!-- Location Section -->
+<div class="section-padding" style="background-color: white; position: relative; padding-bottom: 80px;">
+    <!-- Purple Drip SVG at Top -->
+    <div style="position: absolute; top: -1px; left: 0; width: 100%; overflow: hidden; line-height: 0; z-index: 10;">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none" style="position: relative; display: block; width: calc(100% + 1.3px); height: 80px;">
+            <path d="M0,0 L1200,0 L1200,20 C1150,20 1150,90 1100,90 C1050,90 1050,20 1000,20 C950,20 950,110 900,110 C850,110 850,20 800,20 C750,20 750,70 700,70 C650,70 650,20 600,20 C550,20 550,100 500,100 C450,100 450,20 400,20 C350,20 350,80 300,80 C250,80 250,20 200,20 C150,20 150,120 100,120 C50,120 50,20 0,20 Z" fill="#8e44ad"></path>
+        </svg>
+    </div>
+
+    <div class="container pt-5">
+        <div class="text-center mb-5" style="padding-top: 50px;">
+             <h2 class="display-4 fw-bold" style="color: #4a148c;">Nossa <span class="text-highlight" style="color: #8e44ad;">Localização</span></h2>
+             <p class="lead" style="color: #666;">Venha nos visitar! Estamos esperando por você.</p>
+        </div>
+        
+        <div class="card shadow-lg border-0 overflow-hidden">
+            <div style="position: relative;">
+                <iframe 
+                    width="100%" 
+                    height="500" 
+                    style="border:0;" 
+                    loading="lazy" 
+                    allowfullscreen 
+                    referrerpolicy="no-referrer-when-downgrade"
+                    src="https://maps.google.com/maps?q=Rua+Pedro+Ferraz+Barreto+22+Vila+Seabra+Sao+Paulo+SP&t=&z=15&ie=UTF8&iwloc=&output=embed">
+                </iframe>
+                 <div class="p-4 text-center w-100" style="background: #4a148c; color: white;">
+                    <h5 class="mb-2 fw-bold"><i class="fas fa-map-pin text-warning me-2"></i> Rua Pedro Ferraz Barreto, 22 - Vila Seabra, São Paulo - SP</h5>
+                    <p class="mb-0 text-white-50">Próximo à Praça das Estrelas • Estacionamento Gratuito</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
