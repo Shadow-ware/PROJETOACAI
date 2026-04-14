@@ -46,52 +46,16 @@ namespace acaiGalatico.UI.Forms
             catch { }
         }
 
-        protected override void OnLoad(EventArgs e)
-        {
-            base.OnLoad(e);
-            AbrirPedidos();
-        }
+       
 
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            base.OnFormClosed(e);
-            Application.Exit();
-        }
 
         private void btnPedidos_Click(object sender, EventArgs e)
         {
             AbrirPedidos();
         }
 
-        private void btnDashboard_Click(object sender, EventArgs e)
-        {
-            MostrarPlaceholder("Dashboard em preparação para a próxima etapa.");
-            AtivarMenu(btnDashboard);
-        }
+     
 
-        private void btnProdutos_Click(object sender, EventArgs e)
-        {
-            MostrarPlaceholder("Produtos serão conectados depois, mantendo o foco em Pedidos.");
-            AtivarMenu(btnProdutos);
-        }
-
-        private void btnClientes_Click(object sender, EventArgs e)
-        {
-            MostrarPlaceholder("Clientes serão conectados depois, mantendo o foco em Pedidos.");
-            AtivarMenu(btnClientes);
-        }
-
-        private void btnEditarSite_Click(object sender, EventArgs e)
-        {
-            MostrarPlaceholder("Nenhuma alteração no Web foi feita nesta etapa.");
-            AtivarMenu(btnEditarSite);
-        }
-
-        private void btnCardapio_Click(object sender, EventArgs e)
-        {
-            MostrarPlaceholder("Cardápio desktop pode ser adicionado na próxima etapa.");
-            AtivarMenu(btnCardapio);
-        }
 
         private void btnSair_Click(object sender, EventArgs e)
         {
@@ -126,29 +90,6 @@ namespace acaiGalatico.UI.Forms
             form.Visible = true;
         }
 
-        private void MostrarPlaceholder(string texto)
-        {
-            pnlConteudo.Controls.Clear();
-            var placeholder = new Guna.UI2.WinForms.Guna2Panel
-            {
-                Dock = DockStyle.Fill,
-                FillColor = Color.FromArgb(33, 29, 85)
-            };
-
-            var titulo = new Guna.UI2.WinForms.Guna2HtmlLabel
-            {
-                BackColor = Color.Transparent,
-                ForeColor = Color.White,
-                Text = texto,
-                Font = new Font("Segoe UI Semibold", 16F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(48, 48)
-            };
-
-            placeholder.Controls.Add(titulo);
-            pnlConteudo.Controls.Add(placeholder);
-            placeholder.BringToFront();
-        }
 
         private void AtivarMenu(Guna2Button button)
         {

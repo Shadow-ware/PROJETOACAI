@@ -53,6 +53,10 @@ namespace acaiGalatico.UI.Forms
             cboPagamento.Format += ComboPagamento_Format;
             lblApiInfo.Text = $"API: {_pedidosApiService.BaseUrl}";
 
+            // Handlers
+            btnSalvar.Click += btnSalvar_Click;
+            cboStatus.SelectedIndexChanged += cboStatus_SelectedIndexChanged;
+
             // Desabilita campos que vêm do site (apenas leitura no desktop)
             dtpData.Enabled = false;
             cboCliente.Enabled = false;
@@ -61,6 +65,10 @@ namespace acaiGalatico.UI.Forms
             txtEndereco.ReadOnly = true;
             txtBairro.ReadOnly = true;
             txtObservacao.ReadOnly = true;
+
+            // Configura o botão Salvar
+            btnSalvar.Text = "Salvar Alterações";
+            btnSalvar.Enabled = false;
         }
 
         private async Task CarregarDadosAsync(int? pedidoParaSelecionar = null, bool isAutoRefresh = false)
@@ -150,7 +158,7 @@ namespace acaiGalatico.UI.Forms
                     $"#{pedido.Id}",
                     pedido.DataVenda.ToString("dd/MM/yyyy HH:mm"),
                     ObterStatusLabel(pedido.Status),
-                    pedido.Cliente?.Nome ?? "Cliente Avulso",
+                    ObterNomeCliente(pedido),
                     pedido.ValorTotal.ToString("C2", _culture));
 
                 var row = dgvPedidos.Rows[indice];
@@ -260,33 +268,6 @@ namespace acaiGalatico.UI.Forms
         private async void btnAtualizar_Click(object sender, EventArgs e)
         {
             await CarregarDadosAsync();
-        }
-
-        private async void btnSalvar_Click(object sender, EventArgs e)
-        {
-            if (!int.TryParse(txtCodigo.Text, out var id))
-            {
-                return;
-            }
-
-            try
-            {
-                AlternarCarregamento(true);
-                var pedido = ConstruirPedidoDoFormulario();
-                pedido.Id = id;
-
-                await _pedidosApiService.UpdatePedidoAsync(pedido);
-                MessageBox.Show($"Status do pedido #{pedido.Id} atualizado com sucesso.", "Pedidos", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await CarregarDadosAsync(pedido.Id);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Falha ao salvar pedido", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-            finally
-            {
-                AlternarCarregamento(false);
-            }
         }
 
         private async void btnExcluir_Click(object sender, EventArgs e)
@@ -412,6 +393,55 @@ namespace acaiGalatico.UI.Forms
                     _ => pagamento.ToString()
                 };
             }
+        }
+
+        private static string ObterNomeCliente(PedidoDto pedido)
+        {
+            if (pedido.Cliente != null && !string.IsNullOrEmpty(pedido.Cliente.Nome))
+                return pedido.Cliente.Nome;
+
+            if (!string.IsNullOrEmpty(pedido.Observacao) && pedido.Observacao.Contains("Cliente:"))
+            {
+                var partes = pedido.Observacao.Split('|');
+                var parteCliente = partes.FirstOrDefault(p => p.Trim().StartsWith("Cliente:"));
+                if (parteCliente != null)
+                {
+                    return parteCliente.Replace("Cliente:", "").Trim();
+                }
+            }
+
+            return "Cliente Avulso";
+        }
+
+        private async void btnSalvar_Click(object sender, EventArgs e)
+        {
+            if (!int.TryParse(txtCodigo.Text, out var id)) return;
+
+            try
+            {
+                AlternarCarregamento(true);
+                var pedidoAtualizado = ConstruirPedidoDoFormulario();
+                pedidoAtualizado.Id = id;
+
+                await _pedidosApiService.UpdatePedidoAsync(pedidoAtualizado);
+
+                MessageBox.Show("Alterações salvas com sucesso na central!", "Sucesso", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                await CarregarDadosAsync(id);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erro ao salvar: {ex.Message}", "Erro", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                AlternarCarregamento(false);
+            }
+        }
+
+        private void cboStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (_carregandoFormulario) return;
+            btnSalvar.Enabled = true;
         }
 
         private static string ObterStatusLabel(StatusVendaDto status) => status switch

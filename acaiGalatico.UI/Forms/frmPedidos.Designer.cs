@@ -297,7 +297,7 @@ namespace acaiGalatico.UI.Forms
             pnlEditor.Location = new Point(0, 0);
             pnlEditor.Name = "pnlEditor";
             pnlEditor.Padding = new Padding(14, 0, 18, 18);
-            pnlEditor.Size = new Size(442, 524);
+            pnlEditor.Size = new Size(442, 600); // Aumentado de 524 para 600 para caber os botões sem scroll excessivo
             pnlEditor.TabIndex = 0;
             pnlEditor.AutoScroll = true;
             // 
@@ -520,7 +520,7 @@ namespace acaiGalatico.UI.Forms
             txtObservacao.Multiline = true;
             txtObservacao.Name = "txtObservacao";
             txtObservacao.PlaceholderText = "Detalhes do pedido";
-            txtObservacao.Size = new Size(386, 52);
+            txtObservacao.Size = new Size(386, 42); // Reduzido de 52 para 42
             txtObservacao.TabIndex = 18;
             // 
             // lblItens
@@ -528,7 +528,7 @@ namespace acaiGalatico.UI.Forms
             lblItens.BackColor = Color.Transparent;
             lblItens.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
             lblItens.ForeColor = Color.FromArgb(70, 81, 102);
-            lblItens.Location = new Point(24, 408);
+            lblItens.Location = new Point(24, 396); // Reduzido de 408 para 396
             lblItens.Name = "lblItens";
             lblItens.Size = new Size(93, 17);
             lblItens.TabIndex = 22;
@@ -540,23 +540,22 @@ namespace acaiGalatico.UI.Forms
             txtItens.Cursor = Cursors.IBeam;
             txtItens.DefaultText = "";
             txtItens.Font = new Font("Segoe UI", 9F);
-            txtItens.Location = new Point(24, 428);
+            txtItens.Location = new Point(24, 416); // Reduzido de 428 para 416
             txtItens.Multiline = true;
             txtItens.Name = "txtItens";
             txtItens.PlaceholderText = "Nenhum item detalhado.";
             txtItens.ReadOnly = true;
             txtItens.ScrollBars = ScrollBars.Vertical;
-            txtItens.Size = new Size(386, 80);
+            txtItens.Size = new Size(386, 70); // Reduzido de 80 para 70
             txtItens.TabIndex = 21;
             // 
             // btnSalvar
             // 
-            btnSalvar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
             btnSalvar.BorderRadius = 10;
             btnSalvar.FillColor = Color.FromArgb(155, 89, 182); // #9b59b2
             btnSalvar.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             btnSalvar.ForeColor = Color.White;
-            btnSalvar.Location = new Point(24, 520);
+            btnSalvar.Location = new Point(24, 500); // Reduzido de 520 para 500
             btnSalvar.Name = "btnSalvar";
             btnSalvar.Size = new Size(180, 40);
             btnSalvar.TabIndex = 19;
@@ -565,12 +564,11 @@ namespace acaiGalatico.UI.Forms
             // 
             // btnExcluir
             // 
-            btnExcluir.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
             btnExcluir.BorderRadius = 10;
             btnExcluir.FillColor = Color.FromArgb(231, 76, 60); // #e74c3c
             btnExcluir.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             btnExcluir.ForeColor = Color.White;
-            btnExcluir.Location = new Point(230, 520);
+            btnExcluir.Location = new Point(230, 500); // Reduzido de 520 para 500
             btnExcluir.Name = "btnExcluir";
             btnExcluir.Size = new Size(180, 40);
             btnExcluir.TabIndex = 20;
@@ -619,7 +617,7 @@ namespace acaiGalatico.UI.Forms
             btnFecharPopup.TabIndex = 6;
             btnFecharPopup.Text = "X";
             btnFecharPopup.Visible = false;
-            btnFecharPopup.Click += (s, e) => this.Close();
+
             // 
             // lblApiInfo
             // 

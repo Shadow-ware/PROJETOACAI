@@ -27,15 +27,15 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account.Manage
             _context = context;
         }
 
-        public string Username { get; private set; }
-        public string Email { get; private set; }
+        public string Username { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
         public int OrdersCount { get; private set; }
-        public string FirstName { get; private set; }
-        public string LastName { get; private set; }
+        public string FirstName { get; private set; } = string.Empty;
+        public string LastName { get; private set; } = string.Empty;
         public bool EmailVerified { get; private set; }
-        public string MaskedEmail { get; private set; }
-        public string MaskedPhone { get; private set; }
-        public string ProfilePictureUrl { get; private set; }
+        public string MaskedEmail { get; private set; } = string.Empty;
+        public string MaskedPhone { get; private set; } = string.Empty;
+        public string ProfilePictureUrl { get; private set; } = string.Empty;
         public List<OrderSummary> Orders { get; private set; } = new();
 
         public class OrderSummary
@@ -43,7 +43,7 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account.Manage
             public int Id { get; set; }
             public DateTime Data { get; set; }
             public decimal ValorTotal { get; set; }
-            public string Status { get; set; }
+            public string Status { get; set; } = string.Empty;
         }
 
         [BindProperty]
@@ -53,22 +53,22 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account.Manage
         {
             [Required]
             [Display(Name = "Nome de usuário")]
-            public string NewUserName { get; set; }
+            public string NewUserName { get; set; } = string.Empty;
 
             [Required]
             [EmailAddress]
             [Display(Name = "Email")]
-            public string NewEmail { get; set; }
+            public string NewEmail { get; set; } = string.Empty;
 
             [Phone]
             [Display(Name = "Telefone")]
-            public string PhoneNumber { get; set; }
+            public string? PhoneNumber { get; set; }
 
             [Display(Name = "Sobrenome")]
-            public string LastName { get; set; }
+            public string? LastName { get; set; }
 
             [Display(Name = "Foto de perfil")]
-            public Microsoft.AspNetCore.Http.IFormFile ProfilePhoto { get; set; }
+            public Microsoft.AspNetCore.Http.IFormFile? ProfilePhoto { get; set; }
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -85,7 +85,7 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account.Manage
             LastName = claims.FirstOrDefault(c => c.Type == "family_name")?.Value ?? "";
 
             var parts = (Username ?? "").Split(' ');
-            FirstName = parts.Length > 0 ? parts[0] : Username;
+            FirstName = parts.Length > 0 ? parts[0] : (Username ?? "Usuário");
 
             MaskedEmail = string.IsNullOrEmpty(Email) ? "" : MaskEmail(Email);
             MaskedPhone = string.IsNullOrEmpty(phone) ? "" : MaskPhone(phone);

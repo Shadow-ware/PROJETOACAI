@@ -41,43 +41,34 @@ namespace acaigalatico.Web.Controllers
 
             var email = await _userManager.GetEmailAsync(identityUser) ?? identityUser.Email ?? string.Empty;
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
-            var identificadorCliente = BuildClientIdentifier(identityUser, usuario);
-
-            // 1. Tentar buscar pelo ClienteId (vinculado por telefone/identificador)
-            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Telefone == identificadorCliente);
-            var pedidos = new List<PedidoVm>();
-
-            if (cliente != null)
-            {
-                pedidos = await GetPedidosAsync(_context, cliente.Id);
-            }
             
-            // 2. Fallback: Se não encontrou pedidos pelo ClienteId, buscar todos os pedidos do sistema 
-            // onde o email ou o nome do usuário apareçam na Observação (casos de pedidos antigos ou falha na vinculação)
-            if (!pedidos.Any())
-            {
-                var queryFallback = _context.Vendas.AsNoTracking();
-                
-                // Buscar por termos que identifiquem o usuário nas observações
-                var searchTerms = new List<string> { email };
-                if (usuario != null) searchTerms.Add(usuario.Nome);
-                
-                var todasVendas = await queryFallback.ToListAsync();
-                
-                pedidos = todasVendas
-                    .Where(v => searchTerms.Any(term => !string.IsNullOrEmpty(term) && v.Observacao != null && v.Observacao.Contains(term, StringComparison.OrdinalIgnoreCase)))
-                    .OrderByDescending(v => v.DataVenda)
-                    .Select(v => new PedidoVm
-                    {
-                        Numero = v.Id,
-                        Data = v.DataVenda,
-                        Status = FormatStatus(v.Status),
-                        ValorTotal = v.ValorTotal
-                    })
-                    .ToList();
-            }
+            // Buscar pedidos do banco LOCAL do Web
+            // Tentamos por ClienteId ou por texto na observação (fallback)
+            var telefoneCliente = usuario?.Telefone;
+            var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Telefone == telefoneCliente);
+            
+            var query = _context.Vendas.AsNoTracking();
+            
+            List<Venda> todasVendas = await query.ToListAsync();
+            
+            // Filtra as vendas que pertencem a este usuário
+            var pedidosFiltrados = todasVendas
+                .Where(v => 
+                    (cliente != null && v.ClienteId == cliente.Id) || 
+                    (v.Observacao != null && v.Observacao.Contains(email, StringComparison.OrdinalIgnoreCase)) ||
+                    (usuario != null && v.Observacao != null && v.Observacao.Contains(usuario.Nome, StringComparison.OrdinalIgnoreCase))
+                )
+                .OrderByDescending(v => v.DataVenda)
+                .Select(v => new PedidoVm
+                {
+                    Numero = v.Id,
+                    Data = v.DataVenda,
+                    Status = FormatStatus(v.Status),
+                    ValorTotal = v.ValorTotal
+                })
+                .ToList();
 
-            return View(pedidos);
+            return View(pedidosFiltrados);
         }
 
         public static async Task<List<PedidoVm>> GetPedidosAsync(AppDbContext context, int clienteId)

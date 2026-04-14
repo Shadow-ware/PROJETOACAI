@@ -194,6 +194,7 @@ namespace acaigalatico.Web.Controllers
             }
 
             var (cliente, usuario) = await ResolveClienteAtualAsync();
+            var email = usuario?.Email ?? (await _userManager.GetUserAsync(User))?.Email ?? "Visitante";
             
             // Log para debug no console do servidor
             if (cliente == null) 
@@ -213,7 +214,7 @@ namespace acaigalatico.Web.Controllers
                 Status = model.PaymentMethod == "card" ? StatusVenda.Preparando : StatusVenda.Pendente,
                 EnderecoEntrega = LimitText(enderecoEntrega, 200),
                 BairroEntrega = LimitText(bairroEntrega, 100),
-                Observacao = BuildObservation(tipoSelecionado, tamanhoSelecionado, quantidade, frutasSelecionadas, acompanhamentosSelecionados, model.PaymentMethod) + $" | Pagamento: {infoPagamento}",
+                Observacao = $"Cliente: {usuario?.Nome ?? "Visitante"} ({email}) | " + BuildObservation(tipoSelecionado, tamanhoSelecionado, quantidade, frutasSelecionadas, acompanhamentosSelecionados, model.PaymentMethod) + $" | Pagamento: {infoPagamento}",
                 Itens = new List<ItemVenda>()
             };
 
@@ -264,7 +265,7 @@ namespace acaigalatico.Web.Controllers
                             enderecoEntrega = pedido.EnderecoEntrega,
                             bairroEntrega = pedido.BairroEntrega,
                             observacao = pedido.Observacao,
-                            clienteId = (int?)null, 
+                            clienteId = pedido.ClienteId, // Mantém o vínculo se existir
                             itens = (object?)null
                         };
 
@@ -297,19 +298,30 @@ namespace acaigalatico.Web.Controllers
                 Console.WriteLine($"[API-ERROR] Falha crítica ao conectar com API: {ex.Message}");
             }
 
-            // Se não conseguiu enviar para a API, salva localmente para não perder o pedido
-            // mas avisa o usuário que houve um problema na sincronização galáctica.
-            if (!enviadoParaApi)
+            // Se não conseguiu enviar para a API, já avisamos no console mas salvamos LOCALMENTE de qualquer forma
+            // para que o usuário possa ver seu pedido na página "Meus Pedidos" que consome o banco local.
+            try
             {
                 _context.Vendas.Add(pedido);
                 await _context.SaveChangesAsync();
                 pedidoId = pedido.Id;
-                
+                Console.WriteLine($"[DB-LOCAL] Pedido #{pedidoId} salvo localmente no banco do Web.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DB-LOCAL-ERROR] Falha ao salvar localmente: {ex.Message}");
+            }
+
+            if (!enviadoParaApi)
+            {
                 var lastError = TempData["ApiError"]?.ToString() ?? "Conexão recusada pela API.";
                 TempData["WarningMessage"] = $"Seu pedido foi registrado localmente, mas não pôde ser sincronizado com a central: {lastError}";
             }
 
-            TempData["SuccessMessage"] = "Pedido realizado com sucesso! Em breve entregaremos sua galáxia de sabor.";
+            if (!TempData.ContainsKey("SuccessMessage"))
+            {
+                TempData["SuccessMessage"] = "Pedido realizado com sucesso! Em breve entregaremos sua galáxia de sabor.";
+            }
             
             return RedirectToAction("Index", "Pedidos");
         }
@@ -448,15 +460,35 @@ namespace acaigalatico.Web.Controllers
                 if (price > 0) return price;
             }
 
-            Console.WriteLine($"[DEBUG-PRICE] Chave '{key}' não encontrada ou valor inválido. Usando fallback.");
+            Console.WriteLine($"[DEBUG-PRICE] Chave '{key}' não encontrada ou valor inválido. Usando fallback dinâmico.");
             
             // Fallback para valores padrão se o banco estiver vazio
-            return size switch {
-                "300ml" => 10.00m,
-                "400ml" => 12.00m,
-                "500ml" => 15.00m,
-                "700ml" => 18.00m,
-                _ => 10.00m
+            // Tradicional: 10/12/15/18
+            // Gourmet: 12/15/18/22
+            // Trufado: 14/18/22/28
+            return type switch
+            {
+                "Gourmet" => size switch {
+                    "300ml" => 12.00m,
+                    "400ml" => 15.00m,
+                    "500ml" => 18.00m,
+                    "700ml" => 22.00m,
+                    _ => 12.00m
+                },
+                "Trufado" => size switch {
+                    "300ml" => 14.00m,
+                    "400ml" => 18.00m,
+                    "500ml" => 22.00m,
+                    "700ml" => 28.00m,
+                    _ => 14.00m
+                },
+                _ => size switch {
+                    "300ml" => 10.00m,
+                    "400ml" => 12.00m,
+                    "500ml" => 15.00m,
+                    "700ml" => 18.00m,
+                    _ => 10.00m
+                }
             };
         }
 
@@ -484,23 +516,23 @@ namespace acaigalatico.Web.Controllers
 
         private static string NormalizeType(string? type)
         {
-            return type switch
-            {
-                "Trufado" => "Trufado",
-                "Gourmet" => "Gourmet",
-                _ => "Tradicional"
-            };
+            if (string.IsNullOrWhiteSpace(type)) return "Tradicional";
+            
+            if (type.Contains("Trufado", StringComparison.OrdinalIgnoreCase)) return "Trufado";
+            if (type.Contains("Gourmet", StringComparison.OrdinalIgnoreCase)) return "Gourmet";
+            
+            return "Tradicional";
         }
 
         private static string NormalizeSize(string? size)
         {
-            return size switch
-            {
-                "400ml" => "400ml",
-                "500ml" => "500ml",
-                "700ml" => "700ml",
-                _ => "300ml"
-            };
+            if (string.IsNullOrWhiteSpace(size)) return "300ml";
+
+            if (size.Contains("400")) return "400ml";
+            if (size.Contains("500")) return "500ml";
+            if (size.Contains("700")) return "700ml";
+            
+            return "300ml";
         }
 
         private static decimal ParseDecimal(string? value)
