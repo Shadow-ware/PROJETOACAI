@@ -20,11 +20,15 @@ namespace AcaiGalatico.API.Controllers
         {
             try 
             {
+                Console.WriteLine($"[API-INFO] Recebido pedido GET para listar vendas em {DateTime.Now}");
                 var vendas = await _vendaService.GetVendasAsync();
-                return Ok(vendas);
+                var list = vendas.ToList();
+                Console.WriteLine($"[API-INFO] Retornando {list.Count} vendas.");
+                return Ok(list);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[API-ERROR] Erro no GET vendas: {ex.Message}");
                 return StatusCode(500, $"Erro interno: {ex.Message}");
             }
         }
@@ -32,6 +36,7 @@ namespace AcaiGalatico.API.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Venda>> Get(int id)
         {
+            Console.WriteLine($"[API-INFO] Recebido pedido GET para venda ID {id}");
             var venda = await _vendaService.GetByIdAsync(id);
             if (venda == null) return NotFound();
             return Ok(venda);
@@ -40,30 +45,57 @@ namespace AcaiGalatico.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Venda>> Post([FromBody] Venda venda)
         {
+            Console.WriteLine($"[API-INFO] Recebido novo pedido via POST em {DateTime.Now}");
+            
             if (!ModelState.IsValid) 
             {
+                Console.WriteLine("[API-WARN] ModelState inválido para o pedido recebido.");
                 return BadRequest(ModelState);
             }
             
-            // Se o ID vier preenchido do Web, zeramos para o banco gerar um novo
-            // e evitar conflitos de chave primária.
-            venda.Id = 0; 
-            
-            await _vendaService.AddAsync(venda);
-            return CreatedAtAction(nameof(GetPedidos), new { id = venda.Id }, venda);
+            try 
+            {
+                // Reset do ID para garantir que o banco gere um novo
+                venda.Id = 0; 
+                
+                // Se houver itens, garante que o ID da venda neles também seja resetado
+                if (venda.Itens != null)
+                {
+                    foreach (var item in venda.Itens)
+                    {
+                        item.Id = 0;
+                        item.VendaId = 0;
+                        // Garantir que não estamos tentando adicionar produtos ou vendas existentes
+                        item.Produto = null;
+                        item.Venda = null;
+                    }
+                }
+                
+                // Garantir que não estamos tentando adicionar um cliente existente como novo
+                venda.Cliente = null;
+
+                var novaVenda = await _vendaService.AddAsync(venda);
+                Console.WriteLine($"[API-SUCCESS] Pedido salvo com sucesso! Novo ID: {novaVenda.Id}");
+                return CreatedAtAction(nameof(Get), new { id = novaVenda.Id }, novaVenda);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[API-ERROR] Erro ao salvar pedido: {ex.Message}");
+                if (ex.InnerException != null) Console.WriteLine($"[API-INNER-ERROR] {ex.InnerException.Message}");
+                return StatusCode(500, $"Erro ao salvar pedido: {ex.Message}");
+            }
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Put(int id, [FromBody] Venda venda)
         {
-            if (id != venda.Id) return BadRequest();
+            if (id != venda.Id) return BadRequest("ID divergente.");
             if (!ModelState.IsValid) return BadRequest(ModelState);
             
-            // Busca a venda original para preservar itens e cliente
             var vendaOriginal = await _vendaService.GetByIdAsync(id);
-            if (vendaOriginal == null) return NotFound();
+            if (vendaOriginal == null) return NotFound("Pedido não encontrado.");
 
-            // Atualiza apenas os campos permitidos pelo Desktop
+            // Atualiza o status e demais campos permitidos pelo Desktop
             vendaOriginal.Status = venda.Status;
             vendaOriginal.EnderecoEntrega = venda.EnderecoEntrega;
             vendaOriginal.BairroEntrega = venda.BairroEntrega;

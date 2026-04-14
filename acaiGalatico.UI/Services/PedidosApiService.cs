@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using acaiGalatico.UI.Models;
 
 namespace acaiGalatico.UI.Services
@@ -9,7 +10,8 @@ namespace acaiGalatico.UI.Services
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions = new()
         {
-            PropertyNameCaseInsensitive = true
+            PropertyNameCaseInsensitive = true,
+            ReferenceHandler = ReferenceHandler.IgnoreCycles
         };
 
         public PedidosApiService(HttpClient httpClient)
@@ -40,7 +42,7 @@ namespace acaiGalatico.UI.Services
             }
             catch (Exception ex)
             {
-                throw new Exception($"FALHA CRÍTICA NO DESKTOP:\nNão foi possível ler dados de http://localhost:5207/api/pedidos\n\nDetalhe: {ex.Message}");
+                throw new Exception($"FALHA DE CONEXÃO COM A API:\nNão foi possível ler dados de {_httpClient.BaseAddress}api/pedidos\n\nCertifique-se de que a API está rodando no Terminal.\n\nDetalhe: {ex.Message}");
             }
         }
 

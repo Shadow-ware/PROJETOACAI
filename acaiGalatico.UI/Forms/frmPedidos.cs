@@ -27,9 +27,21 @@ namespace acaiGalatico.UI.Forms
             tmrAtualizacao.Start();
         }
 
+        private bool _estaAtualizando;
+
         private async void tmrAtualizacao_Tick(object sender, EventArgs e)
         {
-            await CarregarDadosAsync(int.TryParse(txtCodigo.Text, out var id) ? id : (int?)null);
+            if (_estaAtualizando) return;
+            
+            try 
+            {
+                _estaAtualizando = true;
+                await CarregarDadosAsync(int.TryParse(txtCodigo.Text, out var id) ? id : (int?)null, true);
+            }
+            finally 
+            {
+                _estaAtualizando = false;
+            }
         }
 
         private void InicializarControles()
@@ -51,17 +63,13 @@ namespace acaiGalatico.UI.Forms
             txtObservacao.ReadOnly = true;
         }
 
-        private async Task CarregarDadosAsync(int? pedidoParaSelecionar = null)
+        private async Task CarregarDadosAsync(int? pedidoParaSelecionar = null, bool isAutoRefresh = false)
         {
             try
             {
-                // DEBUG DIRETO CONFORME SOLICITADO
-                // var debugResponse = await _pedidosApiService.GetPedidosAsync();
-                // MessageBox.Show($"Pedidos encontrados: {debugResponse.Count}");
-
-                // Se estivermos recarregando automaticamente, não mostrar wait cursor
-                var isAutoRefresh = pedidoParaSelecionar.HasValue && !UseWaitCursor;
+                // Se for atualização automática, não mostramos o cursor de espera nem mudamos o estado do formulário de forma visível
                 if (!isAutoRefresh) AlternarCarregamento(true);
+                else lblResumo.Text = "Sincronizando...";
 
                 var clientesTask = _pedidosApiService.GetClientesAsync();
                 var pedidosTask = _pedidosApiService.GetPedidosAsync();
@@ -71,41 +79,50 @@ namespace acaiGalatico.UI.Forms
                 _clientes = clientesTask.Result.OrderBy(c => c.Nome).ToList();
                 _pedidos = pedidosTask.Result.OrderByDescending(p => p.DataVenda).ToList();
 
-                PopularClientes();
-                PopularGrid();
-                AtualizarResumo();
-
-                var idParaSelecionar = pedidoParaSelecionar ?? (_pedidos.FirstOrDefault()?.Id);
-
-                if (idParaSelecionar.HasValue)
+                // Só atualiza os componentes visíveis se necessário ou se não estiver no meio de uma edição
+                if (!_carregandoFormulario)
                 {
-                    var pedido = _pedidos.FirstOrDefault(p => p.Id == idParaSelecionar.Value);
-                    if (pedido != null)
+                    PopularClientes();
+                    PopularGrid();
+                    AtualizarResumo();
+
+                    var idParaSelecionar = pedidoParaSelecionar ?? (_pedidos.FirstOrDefault()?.Id);
+
+                    if (idParaSelecionar.HasValue)
                     {
-                        CarregarPedidoNoFormulario(pedido);
-                        SelecionarPedidoNaGrid(idParaSelecionar.Value);
+                        var pedido = _pedidos.FirstOrDefault(p => p.Id == idParaSelecionar.Value);
+                        if (pedido != null)
+                        {
+                            CarregarPedidoNoFormulario(pedido);
+                            SelecionarPedidoNaGrid(idParaSelecionar.Value);
+                        }
                     }
-                }
-                else
-                {
-                    LimparFormulario();
+                    else
+                    {
+                        LimparFormulario();
+                    }
                 }
             }
             catch (Exception ex)
             {
                 lblResumo.Text = "API indisponível";
-                MessageBox.Show(
-                    $"ERRO DE CONEXÃO DESKTOP -> API\n\n" +
-                    $"Base URL: http://localhost:5207/\n" +
-                    $"Endpoint: api/pedidos\n\n" +
-                    $"Detalhes: {ex.Message}",
-                    "Falha ao carregar pedidos",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                
+                // Só mostra MessageBox se for um erro manual, não no timer
+                if (!isAutoRefresh)
+                {
+                    MessageBox.Show(
+                        $"ERRO DE CONEXÃO DESKTOP -> API\n\n" +
+                        $"Base URL: http://localhost:5207/\n" +
+                        $"Endpoint: api/pedidos\n\n" +
+                        $"Detalhes: {ex.Message}",
+                        "Falha ao carregar pedidos",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
             }
             finally
             {
-                AlternarCarregamento(false);
+                if (!isAutoRefresh) AlternarCarregamento(false);
             }
         }
 

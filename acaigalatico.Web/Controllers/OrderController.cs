@@ -112,8 +112,35 @@ namespace acaigalatico.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> SubmitOrder(PedidoViewModel model)
         {
+            // Força valores padrão se vierem nulos ou vazios
+            model.Type = NormalizeType(model.Type);
+            model.Size = NormalizeSize(model.Size);
+            if (model.Quantity <= 0) model.Quantity = 1;
+            if (string.IsNullOrWhiteSpace(model.PaymentMethod)) model.PaymentMethod = "card";
+
+            // Debug dos valores recebidos
+            Console.WriteLine($"[DEBUG-SUBMIT] Recebido: Tipo='{model.Type}', Tamanho='{model.Size}', Quantidade={model.Quantity}, Metodo='{model.PaymentMethod}'");
+
+            // Se o método de pagamento não for cartão, removemos a validação dos campos de cartão
+            if (model.PaymentMethod != "card")
+            {
+                ModelState.Remove(nameof(model.CardName));
+                ModelState.Remove(nameof(model.CardNumber));
+                ModelState.Remove(nameof(model.CardExpiry));
+                ModelState.Remove(nameof(model.CardCvv));
+            }
+
             if (!ModelState.IsValid)
             {
+                // Log dos erros para facilitar o diagnóstico no console
+                foreach (var state in ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        Console.WriteLine($"[VALIDATION-ERROR] Campo '{state.Key}': {error.ErrorMessage}");
+                    }
+                }
+
                 TempData["ErrorMessage"] = "Por favor, preencha todos os campos obrigatórios corretamente.";
                 return RedirectToAction(nameof(Index));
             }
@@ -201,36 +228,85 @@ namespace acaigalatico.Web.Controllers
                 ProdutoId = 1 // Placeholder ou buscar um produto real se existir
             });
 
-            int pedidoId;
+            int pedidoId = 0;
 
             // --- SINCRONIZAÇÃO OBRIGATÓRIA COM A API ---
+            bool enviadoParaApi = false;
             try
             {
                 using var client = new HttpClient();
-                client.BaseAddress = new Uri("http://localhost:5207/");
-                client.Timeout = TimeSpan.FromSeconds(10);
+                client.Timeout = TimeSpan.FromSeconds(15);
                 
-                var response = await client.PostAsJsonAsync("api/pedidos", pedido);
+                // Configura as opções de serialização para garantir compatibilidade com a API (camelCase)
+                var jsonOptions = new System.Text.Json.JsonSerializerOptions
+                {
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                    PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                };
+
+                // Tenta enviar tanto para 127.0.0.1 quanto para localhost para evitar problemas de resolução DNS/IPv6
+                string[] urls = { "http://127.0.0.1:5207/api/pedidos", "http://localhost:5207/api/pedidos" };
                 
-                if (response.IsSuccessStatusCode)
+                foreach (var url in urls)
                 {
-                    var pedidoCriado = await response.Content.ReadFromJsonAsync<Venda>();
-                    pedidoId = pedidoCriado?.Id ?? 0;
-                }
-                else
-                {
-                    // Fallback: Salva localmente se a API falhar
-                    _context.Vendas.Add(pedido);
-                    await _context.SaveChangesAsync();
-                    pedidoId = pedido.Id;
+                    try 
+                    {
+                        Console.WriteLine($"[API-SYNC] Tentando sincronizar com: {url}");
+                        
+                        // Garante que o pedido está limpo para a API e simplificado para evitar erros de FK
+                        var pedidoParaApi = new {
+                            dataVenda = pedido.DataVenda,
+                            valorTotal = pedido.ValorTotal,
+                            formaPagamento = (int)pedido.FormaPagamento,
+                            status = (int)pedido.Status,
+                            enderecoEntrega = pedido.EnderecoEntrega,
+                            bairroEntrega = pedido.BairroEntrega,
+                            observacao = pedido.Observacao,
+                            clienteId = (int?)null, 
+                            itens = (object?)null
+                        };
+
+                        var response = await client.PostAsJsonAsync(url, pedidoParaApi, jsonOptions);
+                        
+                        if (response.IsSuccessStatusCode)
+                        {
+                            enviadoParaApi = true;
+                            var responseData = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine($"[API-SYNC] Pedido sincronizado com sucesso via {url}! Resposta: {responseData}");
+                            TempData["SuccessMessage"] = "Pedido realizado e sincronizado com a central!";
+                            break; 
+                        }
+                        else
+                        {
+                            var erro = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine($"[API-SYNC-WARN] API em {url} recusou o pedido ({response.StatusCode}): {erro}");
+                            TempData["ApiError"] = $"API recusou ({response.StatusCode}): {erro}";
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"[API-SYNC-ERROR] Falha ao conectar com {url}: {ex.Message}");
+                        TempData["ApiError"] = ex.Message;
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                // Fallback: Salva localmente se a API falhar
+                Console.WriteLine($"[API-ERROR] Falha crítica ao conectar com API: {ex.Message}");
+            }
+
+            // Se não conseguiu enviar para a API, salva localmente para não perder o pedido
+            // mas avisa o usuário que houve um problema na sincronização galáctica.
+            if (!enviadoParaApi)
+            {
                 _context.Vendas.Add(pedido);
                 await _context.SaveChangesAsync();
                 pedidoId = pedido.Id;
+                
+                var lastError = TempData["ApiError"]?.ToString() ?? "Conexão recusada pela API.";
+                TempData["WarningMessage"] = $"Seu pedido foi registrado localmente, mas não pôde ser sincronizado com a central: {lastError}";
             }
 
             TempData["SuccessMessage"] = "Pedido realizado com sucesso! Em breve entregaremos sua galáxia de sabor.";
@@ -334,6 +410,9 @@ namespace acaigalatico.Web.Controllers
 
         private static decimal GetPrice(Dictionary<string, string> contents, string type, string size)
         {
+            // Log para debug
+            Console.WriteLine($"[DEBUG-PRICE] Calculando preço para Tipo: '{type}' e Tamanho: '{size}'");
+
             var key = type switch
             {
                 "Trufado" => size switch
@@ -362,9 +441,23 @@ namespace acaigalatico.Web.Controllers
                 }
             };
 
-            return contents.TryGetValue(key, out var rawValue)
-                ? ParseDecimal(rawValue)
-                : 0m;
+            if (contents.TryGetValue(key, out var rawValue))
+            {
+                var price = ParseDecimal(rawValue);
+                Console.WriteLine($"[DEBUG-PRICE] Chave: {key}, Valor Bruto: {rawValue}, Preço Final: {price}");
+                if (price > 0) return price;
+            }
+
+            Console.WriteLine($"[DEBUG-PRICE] Chave '{key}' não encontrada ou valor inválido. Usando fallback.");
+            
+            // Fallback para valores padrão se o banco estiver vazio
+            return size switch {
+                "300ml" => 10.00m,
+                "400ml" => 12.00m,
+                "500ml" => 15.00m,
+                "700ml" => 18.00m,
+                _ => 10.00m
+            };
         }
 
         private static int GetLimit(Dictionary<string, string> contents, string size, bool fruits)

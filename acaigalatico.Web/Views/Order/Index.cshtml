@@ -30,7 +30,7 @@
 
             <div class="flex-grow-1 overflow-auto p-4 custom-scrollbar">
                 <form asp-action="SubmitOrder" method="post" id="orderForm">
-                        <input type="hidden" name="paymentMethod" id="paymentMethod" value="card" />
+                        <input type="hidden" name="PaymentMethod" id="paymentMethod" value="card" />
                         
                         <!-- 1. Tipo e Tamanho (Cards Compactos) -->
                         <div class="card glass-panel mb-4">
@@ -41,13 +41,13 @@
                                 <div class="mb-3">
                                     <label class="text-white-50 small mb-2">ESCOLHA O TIPO</label>
                                     <div class="btn-group w-100" role="group">
-                                        <input type="radio" class="btn-check" name="type" id="type-tradicional" value="Tradicional" checked onchange="updatePrices()">
+                                        <input type="radio" class="btn-check" name="Type" id="type-tradicional" value="Tradicional" checked onchange="updatePrices()">
                                         <label class="btn btn-outline-light" for="type-tradicional">Tradicional</label>
 
-                                        <input type="radio" class="btn-check" name="type" id="type-trufado" value="Trufado" onchange="updatePrices()">
+                                        <input type="radio" class="btn-check" name="Type" id="type-trufado" value="Trufado" onchange="updatePrices()">
                                         <label class="btn btn-outline-light" for="type-trufado">Trufado</label>
 
-                                        <input type="radio" class="btn-check" name="type" id="type-gourmet" value="Gourmet" onchange="updatePrices()">
+                                        <input type="radio" class="btn-check" name="Type" id="type-gourmet" value="Gourmet" onchange="updatePrices()">
                                         <label class="btn btn-outline-light" for="type-gourmet">Gourmet</label>
                                     </div>
                                 </div>
@@ -71,7 +71,7 @@
                                 </div>
                                 <div class="input-group" style="width: 140px;">
                                     <button class="btn btn-outline-light" type="button" onclick="changeQuantity(-1)"><i class="fas fa-minus"></i></button>
-                                    <input type="text" class="form-control text-center bg-transparent text-white border-light" id="quantity" name="quantity" value="1" readonly>
+                                    <input type="text" class="form-control text-center bg-transparent text-white border-light" id="quantity" name="Quantity" value="1" readonly>
                                     <button class="btn btn-outline-light" type="button" onclick="changeQuantity(1)"><i class="fas fa-plus"></i></button>
                                 </div>
                             </div>
@@ -92,7 +92,7 @@
                                             <small class="d-block text-white-50">Fruta fresca selecionada</small>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input fruit-check fs-4" type="checkbox" name="fruits" value="@fruit">
+                                            <input class="form-check-input fruit-check fs-4" type="checkbox" name="Fruits" value="@fruit">
                                         </div>
                                     </label>
                                 }
@@ -115,7 +115,7 @@
                                             <small class="text-white-50">@item.Description</small>
                                         </div>
                                         <div class="form-check ms-3">
-                                            <input class="form-check-input topping-check fs-4" type="checkbox" name="toppings" value="@item.Name">
+                                            <input class="form-check-input topping-check fs-4" type="checkbox" name="Toppings" value="@item.Name">
                                         </div>
                                     </label>
                                 }
@@ -187,20 +187,20 @@
                 <div id="payment-method-card">
                     <div class="mb-3">
                         <label class="form-label text-white-50 small uppercase fw-bold">Nome no cartão</label>
-                        <input name="cardName" id="cardName" class="form-control auth-input" placeholder="Digite o nome impresso no cartão" autocomplete="cc-name" />
+                        <input name="CardName" id="cardName" class="form-control auth-input" placeholder="Digite o nome impresso no cartão" autocomplete="cc-name" />
                     </div>
                     <div class="mb-3">
                         <label class="form-label text-white-50 small uppercase fw-bold">Número do cartão</label>
-                        <input name="cardNumber" id="cardNumber" class="form-control auth-input" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+                        <input name="CardNumber" id="cardNumber" class="form-control auth-input" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
                     </div>
                     <div class="row">
                         <div class="col-6 mb-3">
                             <label class="form-label text-white-50 small uppercase fw-bold">Validade</label>
-                            <input name="cardExpiry" id="cardExpiry" class="form-control auth-input" inputmode="numeric" placeholder="MM/AA" autocomplete="cc-exp" />
+                            <input name="CardExpiry" id="cardExpiry" class="form-control auth-input" inputmode="numeric" placeholder="MM/AA" autocomplete="cc-exp" />
                         </div>
                         <div class="col-6 mb-3">
                             <label class="form-label text-white-50 small uppercase fw-bold">CVV</label>
-                            <input name="cardCvv" id="cardCvv" type="password" class="form-control auth-input" inputmode="numeric" placeholder="123" autocomplete="cc-csc" />
+                            <input name="CardCvv" id="cardCvv" type="password" class="form-control auth-input" inputmode="numeric" placeholder="123" autocomplete="cc-csc" />
                         </div>
                     </div>
                 </div>
@@ -284,7 +284,7 @@
 
         function updatePrices() {
             // Get selected type
-            const typeRadios = document.getElementsByName("type");
+            const typeRadios = document.getElementsByName("Type");
             for (const radio of typeRadios) {
                 if (radio.checked) {
                     currentType = radio.value;
@@ -304,7 +304,7 @@
                 const col = document.createElement("div");
                 col.className = "col-6";
                 col.innerHTML = `
-                    <input type="radio" class="btn-check size-radio" name="size" id="size-${size}" value="${size}" ${isChecked} onchange="updateSize(this.value)">
+                    <input type="radio" class="btn-check size-radio" name="Size" id="size-${size}" value="${size}" ${isChecked} onchange="updateSize(this.value)">
                     <label class="btn btn-outline-light w-100 p-2 d-flex justify-content-between align-items-center ${activeClass}" for="size-${size}">
                         <span class="fw-bold">${size}</span>
                         <span class="badge bg-light text-dark">R$ ${price.toFixed(2).replace('.', ',')}</span>
@@ -506,11 +506,19 @@
                 const modalBody = document.querySelector('.modal-body');
                 const inputs = modalBody.querySelectorAll('input, select');
                 inputs.forEach(input => {
-                    const hidden = document.createElement('input');
-                    hidden.type = 'hidden';
-                    hidden.name = input.name;
-                    hidden.value = input.value;
-                    form.appendChild(hidden);
+                    if (input.name) {
+                        // Remove se já existir um input com esse nome no form para evitar duplicatas
+                        const existing = form.querySelector(`input[name="${input.name}"]`);
+                        if (existing) {
+                            existing.value = input.value;
+                        } else {
+                            const hidden = document.createElement('input');
+                            hidden.type = 'hidden';
+                            hidden.name = input.name;
+                            hidden.value = input.value;
+                            form.appendChild(hidden);
+                        }
+                    }
                 });
 
                 form.submit();

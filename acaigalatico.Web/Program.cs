@@ -15,6 +15,11 @@ var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? 
     "Data Source=AcaiGalatico.db";
 
+// Log para debug do caminho do banco no Web
+Console.WriteLine($"[WEB-DB-DEBUG] String de conexão: {connectionString}");
+var dbPath = connectionString.Split('=')[1];
+Console.WriteLine($"[WEB-DB-DEBUG] Caminho absoluto do DB: {Path.GetFullPath(dbPath)}");
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(connectionString));
 

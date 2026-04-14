@@ -21,13 +21,16 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
         options.JsonSerializerOptions.WriteIndented = true;
     });
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
-if (builder.Environment.IsDevelopment())
+// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApiDocument(config =>
 {
-    builder.WebHost.UseUrls("http://localhost:5207");
-}
+    config.DocumentName = "v1";
+    config.Title = "Acai Galatico API";
+    config.Version = "v1";
+});
+builder.Services.AddOpenApi();
 
 // Força Kestrel a usar apenas HTTP/1.1 e HTTP/2 (desabilita HTTP/3/MsQuic)
 builder.WebHost.ConfigureKestrel(options =>
@@ -52,6 +55,11 @@ builder.Services.AddCors(options =>
 
 // 1. Pega a string de conex�o do appsettings.json
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+// Log para debug do caminho do banco
+Console.WriteLine($"[API-DB-DEBUG] String de conexão: {connectionString}");
+var dbPath = connectionString.Split('=')[1];
+Console.WriteLine($"[API-DB-DEBUG] Caminho absoluto do DB: {Path.GetFullPath(dbPath)}");
 
 // 2. Configura o AppDbContext para usar SQLite (Igual ao Web)
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -137,8 +145,19 @@ if (app.Environment.IsDevelopment())
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
-}
+    app.UseOpenApi(options => 
+    {
+        options.Path = "/swagger/{documentName}/swagger.json";
+    });
+    app.UseSwaggerUi(config =>
+    {
+        config.Path = "/swagger";
+        config.DocumentPath = "/swagger/v1/swagger.json";
+    });
 
+    // Redireciona a raiz (/) para o Swagger (/swagger) automaticamente
+    app.MapGet("/", () => Results.Redirect("/swagger"));
+}
 // Redirecionamento para HTTPS desabilitado até configurar certificado/endpoint HTTPS
 // app.UseHttpsRedirection();
 

@@ -6,7 +6,7 @@ namespace acaigalatico.Application.Interfaces
     {
         Task<IEnumerable<Venda>> GetVendasAsync();
         Task<Venda?> GetByIdAsync(int? id);
-        Task AddAsync(Venda venda);
+        Task<Venda> AddAsync(Venda venda);
         Task UpdateAsync(Venda venda);
         Task RemoveAsync(int id);
     }

@@ -12,7 +12,7 @@ namespace acaiGalatico.UI
         {
             var httpClient = new HttpClient
             {
-                BaseAddress = new Uri("http://localhost:5207/"),
+                BaseAddress = new Uri("http://127.0.0.1:5207/"),
                 Timeout = TimeSpan.FromSeconds(30)
             };
 

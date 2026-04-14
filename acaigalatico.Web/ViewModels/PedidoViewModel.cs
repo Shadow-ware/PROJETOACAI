@@ -6,21 +6,17 @@ namespace acaigalatico.Web.ViewModels
     public class PedidoViewModel
     {
         // Dados do Pedido
-        [Required]
-        public string Type { get; set; } = string.Empty;
+        public string? Type { get; set; }
 
-        [Required]
-        public string Size { get; set; } = string.Empty;
+        public string? Size { get; set; }
 
-        [Range(1, 100)]
         public int Quantity { get; set; } = 1;
 
         public List<string>? Fruits { get; set; }
         public List<string>? Toppings { get; set; }
 
         // Dados de Pagamento (NÃO PERSISTIDOS)
-        [Required(ErrorMessage = "Escolha a forma de pagamento")]
-        public string PaymentMethod { get; set; } = "card";
+        public string? PaymentMethod { get; set; } = "card";
 
         [Display(Name = "Nome no Cartão")]
         public string? CardName { get; set; }

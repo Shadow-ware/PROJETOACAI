@@ -24,9 +24,9 @@ namespace acaigalatico.Application.Services
             return await _vendaRepository.GetByIdAsync(id.Value);
         }
 
-        public async Task AddAsync(Venda venda)
+        public async Task<Venda> AddAsync(Venda venda)
         {
-            await _vendaRepository.AddAsync(venda);
+            return await _vendaRepository.AddAsync(venda);
         }
 
         public async Task UpdateAsync(Venda venda)
