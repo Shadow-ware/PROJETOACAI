@@ -4,63 +4,82 @@
     ViewData["Title"] = "Cadastrar";
 }
 
-<div class="position-relative" style="min-height: 100vh; padding-top: 100px; padding-bottom: 50px; background: url('/images/galaxiaa.jpg?v=2') no-repeat center center/cover;">
-    <!-- Overlay -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 0;"></div>
+<div class="position-relative register-page">
 
-    <div class="container position-relative" style="z-index: 1;">
+    <!-- Overlay -->
+    <div class="overlay"></div>
+
+    <div class="container position-relative z-1">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
-                <!-- Glass Card -->
-                <div class="glass-card p-5 animate__animated animate__fadeInUp" style="border-radius: 25px; border: 1px solid rgba(255,255,255,0.2);">
-                    
+
+                <div class="glass-card p-5 animate__animated animate__fadeInUp">
+
                     <div class="text-center mb-4">
-                        <i class="fas fa-user-plus fa-3x text-white mb-3" style="text-shadow: 0 0 15px #e056fd;"></i>
+                        <i class="fas fa-user-plus icon-glow"></i>
                         <h2 class="text-white fw-bold">Criar Conta</h2>
                         <p class="text-white-50">Junte-se ao universo do sabor!</p>
                     </div>
 
-                    <form asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                        <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
-                        
+                    <form method="post" autocomplete="off">
+
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <!-- NOME -->
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Nome" class="form-control text-white" placeholder="Seu nome" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            <label asp-for="Input.Nome" class="text-white-50">Nome Completo</label>
-                            <span asp-validation-for="Input.Nome" class="text-danger"></span>
+                            <input asp-for="Input.Nome"
+                                   class="form-control custom-input"
+                                   autocomplete="off"
+                                   placeholder="Nome" />
+                            <label asp-for="Input.Nome">Nome Completo</label>
                         </div>
 
+                        <!-- EMAIL -->
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Email" class="form-control text-white" placeholder="name@example.com" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            <label asp-for="Input.Email" class="text-white-50">Email</label>
-                            <span asp-validation-for="Input.Email" class="text-danger"></span>
+                            <input asp-for="Input.Email"
+                                   class="form-control custom-input"
+                                   autocomplete="off"
+                                   placeholder="Email" />
+                            <label asp-for="Input.Email">Email</label>
                         </div>
-                        
+
+                        <!-- SENHA -->
                         <div class="form-floating mb-3">
-                            <input asp-for="Input.Password" class="form-control text-white" placeholder="Password" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            <label asp-for="Input.Password" class="text-white-50">Senha</label>
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                            <input asp-for="Input.Password"
+                                   type="password"
+                                   class="form-control custom-input"
+                                   autocomplete="new-password"
+                                   placeholder="Senha" />
+                            <label asp-for="Input.Password">Senha</label>
                         </div>
-                        
+
+                        <!-- CONFIRMAR -->
                         <div class="form-floating mb-4">
-                            <input asp-for="Input.ConfirmPassword" class="form-control text-white" placeholder="Password" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            <label asp-for="Input.ConfirmPassword" class="text-white-50">Confirmar Senha</label>
-                            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                            <input asp-for="Input.ConfirmPassword"
+                                   type="password"
+                                   class="form-control custom-input"
+                                   autocomplete="new-password"
+                                   placeholder="Confirmar Senha" />
+                            <label asp-for="Input.ConfirmPassword">Confirmar Senha</label>
                         </div>
-                        
-                        <button type="submit" class="btn btn-lg w-100 fw-bold text-white" style="background: linear-gradient(45deg, #9b59b6, #e056fd); border: none; border-radius: 50px; padding: 12px; box-shadow: 0 4px 15px rgba(224, 86, 253, 0.4);">
+
+                        <button type="submit" class="btn-login">
                             Cadastrar <i class="fas fa-rocket ms-2"></i>
                         </button>
+
                     </form>
 
                     <div class="text-center mt-4">
-                        <p class="text-white-50 mb-0">Já tem uma conta? <a asp-page="./Login" asp-route-returnUrl="@Model.ReturnUrl" class="text-warning fw-bold text-decoration-none">Entrar</a></p>
+                        <p class="text-white-50 mb-0">
+                            Já tem uma conta?
+                            <a asp-page="./Login" class="text-warning fw-bold text-decoration-none">
+                                Entrar
+                            </a>
+                        </p>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}

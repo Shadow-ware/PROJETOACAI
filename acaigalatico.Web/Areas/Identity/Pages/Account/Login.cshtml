@@ -5,100 +5,76 @@
     ViewData["Title"] = "Entrar";
 }
 
-<div class="position-relative" style="min-height: 100vh; padding-top: 130px; padding-bottom: 50px; background: url('/images/galaxiaa.jpg?v=2') no-repeat center center/cover;">
+<div class="position-relative login-page">
     
     <!-- Overlay -->
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 0;"></div>
+    <div class="overlay"></div>
 
-    <div class="container position-relative" style="z-index: 1;">
+    <div class="container position-relative z-1">
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 
-                <div class="glass-card p-5 animate__animated animate__fadeInUp" style="border-radius: 25px; border: 1px solid rgba(255,255,255,0.2);">
+                <div class="glass-card p-5 animate__animated animate__fadeInUp">
                     
                     <div class="text-center mb-4">
                         @if (Request.Query["isAdmin"] == "true")
                         {
-                            <i class="fas fa-user-shield fa-3x text-white mb-3" style="text-shadow: 0 0 15px #e056fd;"></i>
+                            <i class="fas fa-user-shield icon-glow"></i>
                             <h2 class="text-white fw-bold">Área Restrita</h2>
                             <p class="text-white-50">Acesso exclusivo para funcionários</p>
                         }
                         else
                         {
-                            <i class="fas fa-user-circle fa-3x text-white mb-3" style="text-shadow: 0 0 15px #e056fd;"></i>
+                            <i class="fas fa-user-circle icon-glow"></i>
                             <h2 class="text-white fw-bold">Bem-vindo(a)</h2>
                             <p class="text-white-50">Entre ou cadastre-se para continuar</p>
                         }
                     </div>
 
-                    <form id="account" method="post">
-                        <div asp-validation-summary="All" class="text-danger mb-3" role="alert"></div>
+                    <form method="post" autocomplete="off">
                         
-                        <!-- ========================= 🔥 ALTERAÇÃO PRINCIPAL 🔥 ========================= -->
-                        <!-- Um único campo, mas muda conforme o tipo de login -->
-                        <!-- Cliente → Email -->
-                        <!-- Admin → Usuário -->
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
 
+                        <!-- LOGIN -->
                         <div class="form-floating mb-3">
                             <input asp-for="Input.Login"
-                                   class="form-control text-white"
-                                   placeholder="@(Request.Query["isAdmin"] == "true" ? "Usuário" : "Email")"
-                                   style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            
-                            <label asp-for="Input.Login" class="text-white-50">
+                                   class="form-control custom-input"
+                                   autocomplete="off"
+                                   placeholder="Login" />
+
+                            <label asp-for="Input.Login">
                                 @(Request.Query["isAdmin"] == "true" ? "Usuário" : "Email")
                             </label>
-                            
-                            <span asp-validation-for="Input.Login" class="text-danger"></span>
                         </div>
 
-                        <!-- ========================= 🔥 FIM ALTERAÇÃO 🔥 ========================= -->
-                        
+                        <!-- SENHA -->
                         <div class="form-floating mb-3">
                             <input asp-for="Input.Password"
-                                   class="form-control text-white"
-                                   placeholder="Senha"
-                                   style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;" />
-                            
-                            <label asp-for="Input.Password" class="text-white-50">Senha</label>
-                            <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                   type="password"
+                                   class="form-control custom-input"
+                                   autocomplete="new-password"
+                                   placeholder="Senha" />
+
+                            <label asp-for="Input.Password">Senha</label>
                         </div>
 
                         <div class="form-check mb-3">
-                            <input asp-for="Input.RememberMe" class="form-check-input"
-                                   style="background-color: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.5);" />
-                            
+                            <input asp-for="Input.RememberMe" class="form-check-input custom-check" />
                             <label asp-for="Input.RememberMe" class="form-check-label text-white">
-                                @Html.DisplayNameFor(m => m.Input.RememberMe)
+                                Lembrar-me
                             </label>
                         </div>
-                        
-                        <button type="submit"
-                                class="btn btn-lg w-100 fw-bold text-white mb-3"
-                                style="background: linear-gradient(45deg, #9b59b6, #e056fd); border: none; border-radius: 50px; padding: 12px; box-shadow: 0 4px 15px rgba(224, 86, 253, 0.4);">
+
+                        <button type="submit" class="btn-login">
                             Entrar <i class="fas fa-sign-in-alt ms-2"></i>
                         </button>
 
-                        <div class="text-center">
-                            <p class="mb-1">
-                                <a id="forgot-password"
-                                       asp-page="./ForgotPassword"
-                                       class="text-white-50 text-decoration-none small">
-                                    Esqueceu sua senha?
-                                </a>
-                            </p>
-                            
-                            @if (Request.Query["isAdmin"] == "true")
-                            {
-                                <p class="mb-0">
-                                    <a asp-page="./Register"
-                                           asp-route-returnUrl="@Model.ReturnUrl"
-                                           class="text-warning fw-bold text-decoration-none">
-                                        Cadastrar nova conta
-                                    </a>
-                                </p>
-                            }
+                        <div class="text-center mt-3">
+                            <a asp-page="./ForgotPassword" class="link-light small">
+                                Esqueceu sua senha?
+                            </a>
                         </div>
+
                     </form>
 
                 </div>
@@ -106,7 +82,3 @@
         </div>
     </div>
 </div>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
