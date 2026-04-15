@@ -2,9 +2,9 @@
 @{
     ViewData["Title"] = "Fale Conosco";
 
-    // Função auxiliar para obter conteúdo com fallback
-    string GetContent(string key, string defaultValue) => 
-        Model.ContainsKey(key) ? Model[key] : defaultValue;
+    // Função auxiliar para obter conteúdo com fallback (verifica Model nulo e usa TryGetValue)
+    string GetContent(string key, string defaultValue) =>
+        (Model != null && Model.TryGetValue(key, out var value)) ? value : defaultValue;
 }
 
 <div style="background: url('/images/galaxiaa.jpg?v=2') no-repeat center center/cover; padding-top: 120px; padding-bottom: 80px; position: relative;">
