@@ -1,6 +1,5 @@
 @page
 @model LoginModel
-
 @{
     ViewData["Title"] = "Entrar";
 }
@@ -58,12 +57,7 @@
                             <label asp-for="Input.Password">Senha</label>
                         </div>
 
-                        <div class="form-check mb-3">
-                            <input asp-for="Input.RememberMe" class="form-check-input custom-check" />
-                            <label asp-for="Input.RememberMe" class="form-check-label text-white">
-                                Lembrar-me
-                            </label>
-                        </div>
+                      
 
                         <button type="submit" class="btn-login">
                             Entrar <i class="fas fa-sign-in-alt ms-2"></i>
@@ -82,3 +76,5 @@
         </div>
     </div>
 </div>
+
+                        
