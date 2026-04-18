@@ -1,0 +1,71 @@
+@* Shared payment modal partial - same markup as Order/Index *@
+<div class="modal fade" id="paymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered payment-modal-dialog">
+        <div class="modal-content payment-modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold d-flex align-items-center">
+                    <i class="fas fa-credit-card me-2 text-warning"></i> Pagamento
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body pt-0">
+                <!-- Resumo do Pedido -->
+                <div class="order-summary-box mb-4 p-3 rounded-4 bg-white bg-opacity-10 border border-white-10">
+                    <h6 class="text-warning small uppercase fw-bold mb-2"><i class="fas fa-list-ul me-2"></i> Resumo do seu Açaí</h6>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span id="summary-details" class="text-white small">Açaí Tradicional 300ml</span>
+                        <span id="summary-total" class="text-warning fw-bold h5 mb-0">R$ 0,00</span>
+                    </div>
+                    <hr class="my-2 border-white-10">
+                    <p class="text-white-50 mb-0" style="font-size: 0.85rem;">Confirma o valor e deseja processar o pagamento?</p>
+                </div>
+
+                <p class="text-white-50 mb-3 small uppercase fw-bold">Escolha a forma de pagamento:</p>
+                <div class="d-flex gap-3 mb-4">
+                    <button type="button" class="payment-method-btn active" data-method="card">
+                        <i class="fas fa-credit-card me-2"></i> Débito / Crédito
+                    </button>
+                    <button type="button" class="payment-method-btn" data-method="pix">
+                        <i class="fas fa-qrcode me-2"></i> Pix
+                    </button>
+                </div>
+
+                <div id="payment-method-card">
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small uppercase fw-bold">Nome no cartão</label>
+                        <input name="CardName" id="cardName" class="form-control auth-input" placeholder="Digite o nome impresso no cartão" autocomplete="cc-name" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white-50 small uppercase fw-bold">Número do cartão</label>
+                        <input name="CardNumber" id="cardNumber" class="form-control auth-input" inputmode="numeric" placeholder="0000 0000 0000 0000" autocomplete="cc-number" />
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white-50 small uppercase fw-bold">Validade</label>
+                            <input name="CardExpiry" id="cardExpiry" class="form-control auth-input" inputmode="numeric" placeholder="MM/AA" autocomplete="cc-exp" />
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white-50 small uppercase fw-bold">CVV</label>
+                            <input name="CardCvv" id="cardCvv" type="password" class="form-control auth-input" inputmode="numeric" placeholder="123" autocomplete="cc-csc" />
+                        </div>
+                    </div>
+                </div>
+
+                <div id="payment-method-pix" class="d-none text-center">
+                    <div class="text-white-50 mb-3">Escaneie o QR Code para pagar:</div>
+                    <div class="payment-qr-wrap mx-auto mb-3">
+                        <div class="payment-qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                        </div>
+                    </div>
+                    <div class="text-white-50">QR Code será gerado</div>
+                    <div class="text-white-50 mt-2" style="font-size: 0.9rem;">Depois de pagar, clique em finalizar pedido.</div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-light rounded-pill px-4" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" id="paymentSubmit" class="btn btn-success rounded-pill px-4 fw-bold">Finalizar Pedido</button>
+            </div>
+        </div>
+    </div>
+</div>

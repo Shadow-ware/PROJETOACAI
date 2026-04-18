@@ -3,9 +3,10 @@
     <div class="auth-card">
         <h3 class="fw-bold mb-4 d-flex align-items-center"><i class="fas fa-shopping-cart me-2 text-warning"></i> Carrinho</h3>
         <div class="list-group">
-            @foreach (var item in Model)
+            @for (int i = 0; i < Model.Count; i++)
             {
-                <div class="list-group-item bg-transparent border-0 d-flex align-items-center mb-3 p-0">
+                var item = Model[i];
+                <div class="list-group-item bg-transparent border-0 d-flex align-items-center mb-3 p-0" data-index="@i" data-name="@item.Nome" data-quantity="@item.Quantidade" data-price="@item.Preco">
                     <img src="@item.ImagemUrl" class="rounded-3 me-3" style="width: 80px; height: 80px; object-fit: cover;">
                     <div class="flex-grow-1">
                         <div class="fw-bold">@item.Nome</div>
@@ -13,7 +14,7 @@
                     </div>
                     <div class="text-end">
                         <div class="h5 m-0 text-warning">R$ @(item.Preco.ToString("0.00").Replace('.', ','))</div>
-                        <a class="btn btn-sm btn-outline-danger rounded-pill mt-2"><i class="fas fa-trash me-1"></i> Remover</a>
+                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill mt-2 remove-cart-btn"><i class="fas fa-trash me-1"></i> Remover</button>
                     </div>
                 </div>
             }
@@ -26,7 +27,131 @@
             <div class="h4 m-0 text-warning">R$ @(total.ToString("0.00").Replace('.', ','))</div>
         </div>
         <div class="d-grid mt-3">
-            <a asp-controller="Order" asp-action="Index" class="btn btn-primary rounded-pill py-2 fw-bold">Finalizar Pedido</a>
+            <form asp-controller="Carrinho" asp-action="Checkout" method="post" id="checkoutForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="PaymentMethod" id="paymentMethod" value="card" />
+                <input type="hidden" name="CardName" id="formCardName" />
+                <input type="hidden" name="CardNumber" id="formCardNumber" />
+                <input type="hidden" name="CardExpiry" id="formCardExpiry" />
+                <input type="hidden" name="CardCvv" id="formCardCvv" />
+                <button type="button" id="openPaymentModal" class="btn btn-primary rounded-pill py-2 fw-bold">Finalizar Pedido</button>
+            </form>
         </div>
     </div>
 </div>
+
+@{ await Html.RenderPartialAsync("_PaymentModal"); }
+
+@section Scripts {
+    <script>
+        function digitsOnly(value) { return (value ?? "").toString().replace(/\D/g, ""); }
+        function formatCardNumber(value) { const digits = digitsOnly(value).slice(0,16); const parts=[]; for(let i=0;i<digits.length;i+=4) parts.push(digits.slice(i,i+4)); return parts.join(' ');} 
+        function formatExpiry(value){ const digits=digitsOnly(value).slice(0,4); const mm=digits.slice(0,2); const yy=digits.slice(2,4); if(digits.length<=2) return mm; return mm+"/"+yy; }
+        function setPaymentMethod(method){ const card=document.getElementById('payment-method-card'); const pix=document.getElementById('payment-method-pix'); const buttons=document.querySelectorAll('.payment-method-btn'); const paymentMethodInput=document.getElementById('paymentMethod'); buttons.forEach(b=>b.classList.toggle('active', b.getAttribute('data-method')===method)); if(paymentMethodInput) paymentMethodInput.value=method; if(method==='pix'){ card.classList.add('d-none'); pix.classList.remove('d-none'); } else { pix.classList.add('d-none'); card.classList.remove('d-none'); } }
+
+        document.addEventListener('DOMContentLoaded', ()=>{
+            const openBtn = document.getElementById('openPaymentModal');
+            const modalEl = document.getElementById('paymentModal');
+            const submitBtn = document.getElementById('paymentSubmit');
+            const form = document.getElementById('checkoutForm');
+
+            document.getElementById('cardNumber')?.addEventListener('input', e=>{ e.target.value = formatCardNumber(e.target.value); });
+            document.getElementById('cardExpiry')?.addEventListener('input', e=>{ e.target.value = formatExpiry(e.target.value); });
+            document.getElementById('cardCvv')?.addEventListener('input', e=>{ e.target.value = digitsOnly(e.target.value).slice(0,4); });
+
+            const isAuthenticated = @(User.Identity?.IsAuthenticated == true ? "true" : "false");
+            const loginUrl = '@Url.Page("/Account/Login", new { area = "Identity", returnUrl = Url.Action("Index", "Carrinho") })';
+
+            let modalInstance = null;
+            try {
+                const bs = (typeof window !== 'undefined' && window.bootstrap) ? window.bootstrap : (typeof bootstrap !== 'undefined' ? bootstrap : null);
+                if (bs && bs.Modal && modalEl) {
+                    modalInstance = new bs.Modal(modalEl, { backdrop: 'static' });
+                }
+            } catch (ex) {
+                console.error('Falha ao inicializar modal bootstrap:', ex);
+            }
+
+            openBtn?.addEventListener('click', ()=>{
+                if(!isAuthenticated){ window.location.href = loginUrl; return; }
+
+                // build summary
+                const items = document.querySelectorAll('.list-group .list-group-item');
+                const summaryDetails = document.getElementById('summary-details');
+                const summaryTotal = document.getElementById('summary-total');
+                let lines = [];
+                let total = 0;
+                items.forEach(it => {
+                    const name = it.getAttribute('data-name');
+                    const qty = parseInt(it.getAttribute('data-quantity')) || 1;
+                    const price = parseFloat(it.getAttribute('data-price')) || 0;
+                    lines.push(`${qty}x ${name}`);
+                    total += price;
+                });
+                if(summaryDetails) summaryDetails.textContent = lines.join(', ');
+                if(summaryTotal) summaryTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+
+                try { modalInstance?.show(); } catch (ex) { console.error('Erro ao mostrar modal:', ex); }
+            });
+
+            // ensure default payment method
+            setPaymentMethod('card');
+
+            submitBtn?.addEventListener('click', ()=>{
+                const method = document.getElementById('paymentMethod').value;
+                if(method === 'card'){
+                    const name = document.getElementById('cardName').value;
+                    const number = document.getElementById('cardNumber').value;
+                    const expiry = document.getElementById('cardExpiry').value;
+                    const cvv = document.getElementById('cardCvv').value;
+                    if(!name || number.replace(/\s/g,'').length < 16 || expiry.length < 4 || cvv.length < 3){ alert('Por favor, preencha os dados do cartão corretamente.'); return; }
+                }
+
+                // move modal inputs into hidden form inputs
+                // paymentMethod already set by setPaymentMethod
+                // copy modal inputs to hidden form fields
+                document.getElementById('formCardName').value = document.getElementById('cardName').value;
+                document.getElementById('formCardNumber').value = document.getElementById('cardNumber').value;
+                document.getElementById('formCardExpiry').value = document.getElementById('cardExpiry').value;
+                document.getElementById('formCardCvv').value = document.getElementById('cardCvv').value;
+
+                // submit form
+                form.submit();
+            });
+
+            document.querySelectorAll('.payment-method-btn').forEach(btn=>{ btn.addEventListener('click', ()=> setPaymentMethod(btn.getAttribute('data-method'))); });
+
+            // remover item do carrinho
+            document.querySelectorAll('.remove-cart-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    const row = e.target.closest('.list-group-item');
+                    const index = row?.getAttribute('data-index');
+                    if (!index) return;
+
+                    try {
+                        const res = await fetch('@Url.Action("RemoveFromCart", "Carrinho")', {
+                            method: 'POST',
+                            credentials: 'same-origin',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value
+                            },
+                            body: JSON.stringify({ index: parseInt(index) })
+                        });
+
+                        if (res.ok) {
+                            // Remove visually and update totals
+                            row.remove();
+                            location.reload();
+                        } else {
+                            const txt = await res.text();
+                            alert('Falha ao remover item: ' + txt);
+                        }
+                    } catch (ex) {
+                        alert('Erro ao remover item: ' + ex.message);
+                    }
+                });
+            });
+        });
+    </script>
+}
