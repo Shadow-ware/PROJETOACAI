@@ -8,9 +8,13 @@
 
   <ItemGroup>
     <Compile Remove="nova\**" />
+    <Compile Remove="pasta nova\**" />
     <Content Remove="nova\**" />
+    <Content Remove="pasta nova\**" />
     <EmbeddedResource Remove="nova\**" />
+    <EmbeddedResource Remove="pasta nova\**" />
     <None Remove="nova\**" />
+    <None Remove="pasta nova\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,10 +29,6 @@
     <ProjectReference Include="..\acaigalatico.Infrastructure\acaigalatico.Infrastructure.csproj" />
     <ProjectReference Include="..\acaigalatico.Application\acaigalatico.Application.csproj" />
     <ProjectReference Include="..\acaigalatico.Domain\acaigalatico.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="pasta nova\" />
   </ItemGroup>
 
 </Project>

@@ -63,6 +63,11 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account
                 ModelState.AddModelError(string.Empty, ErrorMessage);
             }
 
+            if (TempData.ContainsKey("EmailRecuperacao"))
+            {
+                Input = new InputModel { Login = TempData["EmailRecuperacao"]?.ToString() };
+            }
+
             returnUrl ??= Url.Content("~/");
 
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -125,10 +130,14 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account
                 }
 
                 ModelState.AddModelError(string.Empty, "Login ou senha inválidos.");
-                return Page();
+                ErrorMessage = "Login ou senha inválidos.";
+                TempData["EmailRecuperacao"] = Input.Login;
+                return RedirectToPage(new { isAdmin = isAdminLogin, returnUrl = returnUrl });
             }
 
-            return Page();
+            TempData["EmailRecuperacao"] = Input?.Login;
+            ErrorMessage = "Por favor, preencha todos os campos.";
+            return RedirectToPage(new { returnUrl = returnUrl });
         }
     }
 }

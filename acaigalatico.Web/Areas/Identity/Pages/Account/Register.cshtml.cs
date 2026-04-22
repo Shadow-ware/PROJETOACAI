@@ -41,6 +41,9 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account
 
         public string ReturnUrl { get; set; }
 
+        [TempData]
+        public string ErrorMessage { get; set; }
+
         public IList<AuthenticationScheme> ExternalLogins { get; set; }
 
         public class InputModel
@@ -68,6 +71,20 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            if (!string.IsNullOrEmpty(ErrorMessage))
+            {
+                ModelState.AddModelError(string.Empty, ErrorMessage);
+            }
+
+            if (TempData.ContainsKey("Registro_Nome") || TempData.ContainsKey("Registro_Email"))
+            {
+                Input = new InputModel
+                {
+                    Nome = TempData["Registro_Nome"]?.ToString(),
+                    Email = TempData["Registro_Email"]?.ToString()
+                };
+            }
+
             ReturnUrl = returnUrl;
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
@@ -127,9 +144,13 @@ namespace acaigalatico.Web.Areas.Identity.Pages.Account
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
+
+                ErrorMessage = string.Join(" ", result.Errors.Select(e => e.Description));
             }
 
-            return Page();
+            TempData["Registro_Nome"] = Input?.Nome;
+            TempData["Registro_Email"] = Input?.Email;
+            return RedirectToPage(new { returnUrl = returnUrl });
         }
     }
 }

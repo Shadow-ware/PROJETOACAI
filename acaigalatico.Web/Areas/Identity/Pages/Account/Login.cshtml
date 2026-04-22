@@ -64,7 +64,7 @@
                         </button>
 
                         <div class="text-center mt-3">
-                            <a asp-page="./ForgotPassword" class="link-light small">
+                            <a asp-page="./ForgotPassword" asp-route-email="@Model.Input?.Login" class="link-light small">
                                 Esqueceu sua senha?
                             </a>
                         </div>
@@ -76,5 +76,9 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
 
                         

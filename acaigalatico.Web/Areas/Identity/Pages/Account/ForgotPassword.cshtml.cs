@@ -1,87 +1,161 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
-using acaigalatico.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Logging;
+using acaigalatico.Infrastructure.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace acaigalatico.Web.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class ForgotPasswordModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IEmailService _emailService;
-        private readonly ILogger<ForgotPasswordModel> _logger;
+        private readonly AppDbContext _context;
 
-        public ForgotPasswordModel(
-            UserManager<IdentityUser> userManager,
-            IEmailService emailService,
-            ILogger<ForgotPasswordModel> logger)
+        public ForgotPasswordModel(AppDbContext context)
         {
-            _userManager = userManager;
-            _emailService = emailService;
-            _logger = logger;
+            _context = context;
         }
 
         [BindProperty]
-        public InputModel Input { get; set; } = new();
+        public InputModel Input { get; set; }
+
+        public string Email { get; set; }
+        public string EmailMascarado { get; set; }
+
+        public int Etapa { get; set; }
 
         public class InputModel
         {
-            [Required(ErrorMessage = "Informe seu email.")]
-            [EmailAddress(ErrorMessage = "Digite um email valido.")]
-            public string Email { get; set; } = string.Empty;
+            [Display(Name = "Nome Completo")]
+            public string Nome { get; set; }
         }
 
-        public void OnGet()
+        public async Task<IActionResult> OnGetAsync(string email)
         {
-        }
-
-        public async Task<IActionResult> OnPostAsync()
-        {
-            if (!ModelState.IsValid)
+            // 1️⃣ tenta pegar da URL
+            if (!string.IsNullOrEmpty(email))
             {
+                Email = email;
+            }
+            else
+            {
+                // 2️⃣ fallback para TempData
+                Email = TempData["EmailRecuperacao"]?.ToString();
+            }
+
+            if (string.IsNullOrEmpty(Email))
+            {
+                ModelState.AddModelError(string.Empty, "Email não identificado. Tente o login primeiro.");
+                Etapa = 0;
                 return Page();
             }
 
-            var user = await _userManager.FindByEmailAsync(Input.Email);
-
-            if (user == null)
+            // Validar se o email existe no banco
+            var usuarioExiste = await _context.Usuarios.AnyAsync(u => u.Email == Email);
+            
+            if (!usuarioExiste)
             {
-                return RedirectToPage("./ForgotPasswordConfirmation");
+                ModelState.AddModelError(string.Empty, "Usuário não encontrado.");
+                Etapa = 0;
+                return Page();
             }
 
-            var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-
-            var callbackUrl = Url.Page(
-                "/Account/ResetPassword",
-                pageHandler: null,
-                values: new { area = "Identity", code },
-                protocol: Request.Scheme);
-
-            try
+            EmailMascarado = MascaraEmail(Email);
+            
+            if (TempData.ContainsKey("Etapa"))
             {
-                var message =
-                    $"Ola, {user.UserName}!<br/><br/>" +
-                    "Recebemos uma solicitacao para redefinir sua senha.<br/>" +
-                    $"Clique no link abaixo para continuar:<br/><br/><a href=\"{callbackUrl}\">Redefinir senha</a>";
-
-                await _emailService.SendEmailAsync(Input.Email, "Redefinicao de senha - Acai Galactico", message);
+                Etapa = (int)TempData["Etapa"];
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Falha ao enviar email de redefinicao para {Email}.", Input.Email);
-                TempData["WarningMessage"] = "Nao foi possivel enviar o email agora. Verifique a configuracao do envio.";
+                Etapa = 1;
+            }
+            
+            TempData["EmailRecuperacao"] = Email;
+            TempData.Keep("EmailRecuperacao");
+            TempData["Etapa"] = Etapa;
+
+            return Page();
+        }
+
+        public async Task<IActionResult> OnPostAsync(int? etapaInformada)
+        {
+            Email = TempData["EmailRecuperacao"]?.ToString();
+            if (string.IsNullOrEmpty(Email))
+            {
+                ModelState.AddModelError(string.Empty, "Sessão expirada. Tente logar novamente.");
+                return Page();
             }
 
-            return RedirectToPage("./ForgotPasswordConfirmation");
+            EmailMascarado = MascaraEmail(Email);
+            
+            // Determina a etapa atual (vinda do formulário ou do TempData)
+            int etapaAtual = etapaInformada ?? (TempData.ContainsKey("Etapa") ? (int)TempData["Etapa"] : 1);
+
+            if (etapaAtual == 1)
+            {
+                // ETAPA 1 finalizada -> Mudar para ETAPA 2
+                Etapa = 2;
+                TempData["Etapa"] = 2;
+                TempData["EmailRecuperacao"] = Email;
+                TempData.Keep("EmailRecuperacao");
+                return Page();
+            }
+            else if (etapaAtual == 2)
+            {
+                Etapa = 2; // Mantém na etapa 2 em caso de erro
+
+                if (string.IsNullOrWhiteSpace(Input.Nome))
+                {
+                    ModelState.AddModelError("Input.Nome", "O nome completo é obrigatório.");
+                    TempData["Etapa"] = 2;
+                    TempData["EmailRecuperacao"] = Email;
+                    TempData.Keep("EmailRecuperacao");
+                    return Page();
+                }
+
+                var usuario = await _context.Usuarios
+                    .FirstOrDefaultAsync(u => u.Email == Email);
+
+                if (usuario == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Usuário não encontrado");
+                    TempData["Etapa"] = 2;
+                    TempData["EmailRecuperacao"] = Email;
+                    TempData.Keep("EmailRecuperacao");
+                    return Page();
+                }
+
+                if (usuario.Nome.Trim().ToLower() != Input.Nome.Trim().ToLower())
+                {
+                    ModelState.AddModelError(string.Empty, "Nome não confere");
+                    TempData["Etapa"] = 2;
+                    TempData["EmailRecuperacao"] = Email;
+                    TempData.Keep("EmailRecuperacao");
+                    return Page();
+                }
+
+                TempData["EmailRecuperacao"] = Email; // Manter para o próximo passo
+                return RedirectToPage("./ResetPassword");
+            }
+
+            return Page();
+        }
+
+        public string MascaraEmail(string email)
+        {
+            var partes = email.Split('@');
+            var nome = partes[0];
+
+            if (nome.Length <= 3)
+                return "***@" + partes[1];
+
+            return nome.Substring(0, 3) + "****@" + partes[1];
         }
     }
 }
