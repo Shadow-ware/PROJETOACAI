@@ -88,35 +88,95 @@ namespace acaigalatico.Web.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult AddToCart([FromForm] string Type, [FromForm] string Size, [FromForm] int Quantity = 1)
+        public async Task<IActionResult> Adicionar(acaigalatico.Web.ViewModels.PedidoViewModel model)
         {
-            // read fruits and toppings manually from Form
-            var fruits = Request.Form.Where(kvp => kvp.Key == "Fruits").SelectMany(kvp => kvp.Value).ToList();
-            var toppings = Request.Form.Where(kvp => kvp.Key == "Toppings").SelectMany(kvp => kvp.Value).ToList();
-
-            // Simplified price calculation: use fixed mapping (should reuse OrderController.GetPrice in future)
-            decimal unit = 10m;
-            if (Type?.Contains("Gourmet", StringComparison.OrdinalIgnoreCase) == true) unit = 12m;
-            if (Type?.Contains("Trufado", StringComparison.OrdinalIgnoreCase) == true) unit = 14m;
-            if (Size?.Contains("400") == true) unit += 2;
-            if (Size?.Contains("500") == true) unit += 5;
-            if (Size?.Contains("700") == true) unit += 8;
-
-            var cart = GetCartFromSession();
-            cart.Add(new CartPedidoItem
+            if (!ModelState.IsValid)
             {
-                Type = Type ?? "Tradicional",
-                Size = Size ?? "300ml",
-                Quantity = Quantity > 0 ? Quantity : 1,
-                Fruits = fruits,
-                Toppings = toppings,
-                UnitPrice = unit
-            });
+                return Json(new { success = false, message = "Dados do pedido inválidos." });
+            }
 
-            SaveCartToSession(cart);
+            try
+            {
+                // 1. Mapear para o formato interno do carrinho
+                var newItem = new CartPedidoItem
+                {
+                    Type = model.Tipo ?? model.Type ?? "Tradicional",
+                    Size = model.Tamanho ?? model.Size ?? "300ml",
+                    Quantity = model.Quantidade > 0 ? model.Quantidade : (model.Quantity > 0 ? model.Quantity : 1),
+                    Fruits = !string.IsNullOrEmpty(model.Frutas) ? model.Frutas.Split(',').Select(f => f.Trim()).ToList() : (model.Fruits ?? new List<string>()),
+                    Toppings = !string.IsNullOrEmpty(model.Acompanhamentos) ? model.Acompanhamentos.Split(',').Select(t => t.Trim()).ToList() : (model.Toppings ?? new List<string>()),
+                    UnitPrice = model.Valor > 0 ? model.Valor / (model.Quantidade > 0 ? model.Quantidade : 1) : 15.00m // Fallback de preço
+                };
 
-            Console.WriteLine($"[CART] Item adicionado: {Type} {Size} x{Quantity} (unit {unit})");
-            return Ok();
+                // Se o preço unitário ainda for muito baixo, tentamos calcular
+                if (newItem.UnitPrice <= 5) newItem.UnitPrice = 15.00m;
+
+                // 2. Adicionar ao carrinho na sessão
+                var cart = GetCartFromSession();
+                cart.Add(newItem);
+                SaveCartToSession(cart);
+
+                Console.WriteLine($"[DEBUG] Item adicionado via Adicionar: {newItem.Type} {newItem.Size}");
+
+                // 3. Retornar sucesso para o fetch
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[ERROR] Erro no Adicionar: {ex.Message}");
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddToCart([FromForm] string Type, [FromForm] string Size, [FromForm] int Quantity = 1, [FromForm] List<string>? Fruits = null, [FromForm] List<string>? Toppings = null, [FromForm] decimal Valor = 0)
+        {
+            try
+            {
+                // Binding automático deve funcionar com FromForm e URLSearchParams
+                var fruits = Fruits ?? new List<string>();
+                var toppings = Toppings ?? new List<string>();
+
+                // Preço unitário baseado no valor enviado ou cálculo manual
+                decimal unit = Valor > 0 ? Valor / (Quantity > 0 ? Quantity : 1) : 0;
+                
+                if (unit <= 0)
+                {
+                    unit = 10m;
+                    if (!string.IsNullOrEmpty(Type))
+                    {
+                        if (Type.Contains("Gourmet", StringComparison.OrdinalIgnoreCase)) unit = 15m;
+                        else if (Type.Contains("Trufado", StringComparison.OrdinalIgnoreCase)) unit = 13m;
+                    }
+
+                    if (!string.IsNullOrEmpty(Size))
+                    {
+                        if (Size.Contains("400")) unit += 2;
+                        else if (Size.Contains("500")) unit += 5;
+                        else if (Size.Contains("700")) unit += 10;
+                    }
+                }
+
+                var cart = GetCartFromSession();
+                var newItem = new CartPedidoItem
+                {
+                    Type = Type ?? "Tradicional",
+                    Size = Size ?? "300ml",
+                    Quantity = Quantity > 0 ? Quantity : 1,
+                    Fruits = fruits,
+                    Toppings = toppings,
+                    UnitPrice = unit
+                };
+                cart.Add(newItem);
+
+                SaveCartToSession(cart);
+                return Json(new { success = true, itemCount = cart.Count });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
         }
 
         [HttpPost]
@@ -180,6 +240,33 @@ namespace acaigalatico.Web.Controllers
             var identityUser = await _userManager.GetUserAsync(User);
             var email = await _userManager.GetEmailAsync(identityUser) ?? identityUser?.Email ?? "Visitante";
 
+            // CONSTRUÇÃO DAS OBSERVAÇÕES DETALHADAS (CRÍTICO PARA O DESKTOP)
+            var observationParts = new List<string>();
+            
+            // Se houver apenas um item, usamos o formato simples que o Desktop entende bem
+            if (cart.Count == 1)
+            {
+                var c = cart[0];
+                observationParts.Add($"Tipo: {c.Type}");
+                observationParts.Add($"Tamanho: {c.Size}");
+                observationParts.Add($"Quantidade: {c.Quantity}");
+                observationParts.Add($"Frutas: {(c.Fruits != null && c.Fruits.Any() ? string.Join(", ", c.Fruits) : "Nenhuma")}");
+                observationParts.Add($"Acompanhamentos: {(c.Toppings != null && c.Toppings.Any() ? string.Join(", ", c.Toppings) : "Nenhum")}");
+            }
+            else
+            {
+                // Para múltiplos itens, tentamos um resumo ou listagem
+                observationParts.Add($"Resumo: {cart.Count} itens no carrinho");
+                for (int i = 0; i < cart.Count; i++)
+                {
+                    var c = cart[i];
+                    observationParts.Add($"Item {i+1}: {c.Quantity}x {c.Type} {c.Size}");
+                }
+            }
+
+            observationParts.Add($"Cliente: {usuario?.Nome ?? "Visitante"} ({email})");
+            observationParts.Add($"Pagamento: {infoPagamento}");
+
             var pedido = new Venda
             {
                 DataVenda = DateTime.Now,
@@ -189,7 +276,7 @@ namespace acaigalatico.Web.Controllers
                 Status = paymentMethod == "card" ? StatusVenda.Preparando : StatusVenda.Pendente,
                 EnderecoEntrega = usuario?.Endereco ?? "Retirada/Uber Moto",
                 BairroEntrega = "",
-                Observacao = $"Cliente: {usuario?.Nome ?? "Visitante"} ({email}) | Pedido via Carrinho | Pagamento: {infoPagamento}",
+                Observacao = LimitText(string.Join(" | ", observationParts), 500),
                 Itens = new List<ItemVenda>()
             };
 
@@ -207,10 +294,22 @@ namespace acaigalatico.Web.Controllers
 
                 var jsonOptions = new System.Text.Json.JsonSerializerOptions
                 {
-                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
                     PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
-                    PropertyNameCaseInsensitive = true,
-                    DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+                    PropertyNameCaseInsensitive = true
+                };
+
+                // Enviamos um objeto simplificado para a API para garantir compatibilidade e evitar erros de FK/Navegação
+                var pedidoParaApi = new
+                {
+                    dataVenda = pedido.DataVenda,
+                    valorTotal = pedido.ValorTotal,
+                    formaPagamento = (int)pedido.FormaPagamento,
+                    status = (int)pedido.Status,
+                    enderecoEntrega = pedido.EnderecoEntrega,
+                    bairroEntrega = pedido.BairroEntrega,
+                    observacao = pedido.Observacao,
+                    clienteId = (int?)null, // Evita erro de FK se o ID do cliente não existir na API
+                    itens = (object?)null  // O Desktop lê os detalhes da Observação
                 };
 
                 string[] urls = { "http://127.0.0.1:5207/api/pedidos", "http://localhost:5207/api/pedidos" };
@@ -218,29 +317,29 @@ namespace acaigalatico.Web.Controllers
                 {
                     try
                     {
-                        var pedidoParaApi = new {
-                            dataVenda = pedido.DataVenda,
-                            valorTotal = pedido.ValorTotal,
-                            formaPagamento = (int)pedido.FormaPagamento,
-                            status = (int)pedido.Status,
-                            enderecoEntrega = pedido.EnderecoEntrega,
-                            bairroEntrega = pedido.BairroEntrega,
-                            observacao = pedido.Observacao,
-                            clienteId = pedido.ClienteId,
-                            itens = (object?)null
-                        };
-
                         var response = await client.PostAsJsonAsync(url, pedidoParaApi, jsonOptions);
                         if (response.IsSuccessStatusCode)
                         {
                             enviadoParaApi = true;
+                            Console.WriteLine($"[API-SYNC-SUCCESS] Pedido enviado para {url}");
                             break;
                         }
+                        else
+                        {
+                            var errorBody = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine($"[API-SYNC-FAIL] {url} retornou {response.StatusCode}: {errorBody}");
+                        }
                     }
-                    catch { }
+                    catch (Exception apiEx)
+                    {
+                        Console.WriteLine($"[API-SYNC-ERROR] Falha ao enviar para {url}: {apiEx.Message}");
+                    }
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[API-SYNC-CRITICAL] {ex.Message}");
+            }
 
             // Save local
             _context.Vendas.Add(pedido);

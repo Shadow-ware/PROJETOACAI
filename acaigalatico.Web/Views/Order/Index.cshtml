@@ -401,40 +401,74 @@
 
             // Replace Order finalize button: add to cart behavior
             const addToCartBtn = document.getElementById("addToCart");
-            addToCartBtn?.addEventListener("click", async () => {
+            addToCartBtn?.addEventListener("click", async (e) => {
+                e.preventDefault(); // Garante que não haja comportamento padrão
+
                 if (!isAuthenticated) {
                     window.location.href = loginUrl;
                     return;
                 }
 
-                // Build payload similar to PedidoViewModel but minimal
-                const formPayload = new FormData();
-                formPayload.append('Type', currentType);
-                formPayload.append('Size', currentSize);
-                formPayload.append('Quantity', document.getElementById('quantity').value);
+                // Bloqueia o botão para evitar múltiplos cliques
+                addToCartBtn.disabled = true;
+                const originalText = addToCartBtn.innerHTML;
+                addToCartBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Adicionando...';
 
-                // fruits and toppings
-                document.querySelectorAll('.fruit-check:checked').forEach(f => formPayload.append('Fruits', f.value));
-                document.querySelectorAll('.topping-check:checked').forEach(t => formPayload.append('Toppings', t.value));
+                // Build payload as URLSearchParams for application/x-www-form-urlencoded
+                const params = new URLSearchParams();
+                
+                // Mapeamento para o novo modelo do usuário
+                params.append('Tipo', currentType);
+                params.append('Tamanho', currentSize);
+                params.append('Quantidade', document.getElementById('quantity').value);
+                
+                const selectedFruits = Array.from(document.querySelectorAll('.fruit-check:checked')).map(f => f.value);
+                const selectedToppings = Array.from(document.querySelectorAll('.topping-check:checked')).map(t => t.value);
+                
+                params.append('Frutas', selectedFruits.join(', '));
+                params.append('Acompanhamentos', selectedToppings.join(', '));
+                
+                // Valor total calculado no frontend
+                const unitPrice = prices[currentType][currentSize];
+                const quantityVal = parseInt(document.getElementById('quantity').value) || 1;
+                params.append('Valor', (unitPrice * quantityVal).toFixed(2).replace('.', ','));
 
-                // send to /Carrinho/AddToCart
+                // Anti-Forgery Token
+                const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+                if (token) {
+                    params.append('__RequestVerificationToken', token);
+                }
+
                 try {
-                    const res = await fetch('@Url.Action("AddToCart", "Carrinho")', {
+                    const res = await fetch('@Url.Action("Adicionar", "Carrinho")', {
                         method: 'POST',
-                        body: formPayload,
+                        body: params,
                         credentials: 'same-origin',
-                        headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value }
+                        headers: {
+                            'X-CSRF-TOKEN': token,
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        }
                     });
 
-                    if (res.ok) {
-                        // Redirect to cart
-                        window.location.href = '@Url.Action("Index", "Carrinho")';
+                    const data = await res.json();
+
+                    if (res.ok && data.success) {
+                        addToCartBtn.innerHTML = '<i class="fas fa-check"></i> Adicionado!';
+                        addToCartBtn.className = "btn btn-success btn-lg rounded-pill px-5 fw-bold shadow-lg";
+                        
+                        setTimeout(() => {
+                            window.location.href = '@Url.Action("Index", "Carrinho")';
+                        }, 500);
                     } else {
-                        const txt = await res.text();
-                        alert('Falha ao adicionar ao carrinho: ' + txt);
+                        alert('Falha ao adicionar ao carrinho: ' + (data.message || 'Verifique se todos os campos foram selecionados.'));
+                        addToCartBtn.disabled = false;
+                        addToCartBtn.innerHTML = originalText;
                     }
                 } catch (ex) {
-                    alert('Erro de rede ao adicionar ao carrinho: ' + ex.message);
+                    console.error('Erro:', ex);
+                    alert('Erro de conexão. Verifique se o servidor está rodando.');
+                    addToCartBtn.disabled = false;
+                    addToCartBtn.innerHTML = originalText;
                 }
             });
 

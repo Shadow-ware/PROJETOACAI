@@ -142,5 +142,19 @@ namespace AcaiGalatico.API.Controllers
             await _vendaService.RemoveAsync(id);
             return NoContent();
         }
+
+        [HttpPut("{id}/finalizar")]
+        public async Task<IActionResult> Finalizar(int id)
+        {
+            Console.WriteLine($"[API-INFO] Finalizando pedido ID {id}");
+            var venda = await _vendaService.GetByIdAsync(id);
+            if (venda == null) return NotFound("Pedido não encontrado.");
+
+            venda.Status = StatusVenda.Entregue; // Define como Entregue para sumir da fila
+            await _vendaService.UpdateAsync(venda);
+            
+            Console.WriteLine($"[API-SUCCESS] Pedido {id} finalizado com sucesso.");
+            return NoContent();
+        }
     }
 }

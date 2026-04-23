@@ -1,3 +1,4 @@
+#nullable disable
 using System.Drawing;
 using System.Windows.Forms;
 using Guna.UI2.WinForms;
@@ -7,11 +8,12 @@ namespace acaiGalatico.UI.Forms
     public partial class frmPrincipal : Form
     {
         private readonly string _nomeUsuario;
-        private readonly Image? _fotoUsuario;
-        private frmPedidos? _frmPedidos;
-        private Guna2Button? _currentButton;
+        private readonly Image _fotoUsuario;
+        private frmPedidos _frmPedidos;
+        private frmVendas _frmVendas;
+        private Guna2Button _currentButton;
 
-        public frmPrincipal(string nomeUsuario, Image? fotoUsuario)
+        public frmPrincipal(string nomeUsuario, Image fotoUsuario)
         {
             _nomeUsuario = nomeUsuario;
             _fotoUsuario = fotoUsuario;
@@ -54,8 +56,10 @@ namespace acaiGalatico.UI.Forms
             AbrirPedidos();
         }
 
-     
-
+        private void btnVendas_Click(object sender, EventArgs e)
+        {
+            AbrirVendas();
+        }
 
         private void btnSair_Click(object sender, EventArgs e)
         {
@@ -68,6 +72,14 @@ namespace acaiGalatico.UI.Forms
             CarregarFormulario(_frmPedidos);
             lblPaginaTitulo.Text = "Pedidos";
             AtivarMenu(btnPedidos);
+        }
+
+        private void AbrirVendas()
+        {
+            _frmVendas ??= new frmVendas();
+            CarregarFormulario(_frmVendas);
+            lblPaginaTitulo.Text = "Produção (Vendas)";
+            AtivarMenu(btnVendas);
         }
 
         private void CarregarFormulario(Form form)

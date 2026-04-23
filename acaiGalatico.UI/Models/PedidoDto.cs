@@ -1,3 +1,5 @@
+using System.Text.RegularExpressions;
+
 namespace acaiGalatico.UI.Models
 {
     public sealed class PedidoDto
@@ -13,6 +15,52 @@ namespace acaiGalatico.UI.Models
         public string BairroEntrega { get; set; } = string.Empty;
         public string Observacao { get; set; } = string.Empty;
         public List<ItemPedidoDto> Itens { get; set; } = new();
+
+        // Propriedades parseadas da Observacao (Regex mais flexível)
+        private string GetValue(string key)
+        {
+            if (string.IsNullOrEmpty(Observacao)) return string.Empty;
+            // Busca a chave e pega o conteúdo até o próximo | ou || ou fim da string
+            var match = Regex.Match(Observacao, $@"{key}:\s*(.*?)(?:\||\|\||$)", RegexOptions.IgnoreCase);
+            return match.Success ? match.Groups[1].Value.Trim() : string.Empty;
+        }
+
+        public string TipoParsed => GetValue("Tipo");
+        public string TamanhoParsed => GetValue("Tamanho");
+        public string QuantidadeParsed => GetValue("Quantidade");
+        public string FrutasParsed => GetValue("Frutas");
+        public string AcompanhamentosParsed => GetValue("Acompanhamentos");
+        public string PagamentoParsed => GetValue("Pagamento");
+        public string ClienteParsed => GetValue("Cliente");
+
+        // Propriedades de auxílio para exibição
+        public string ClienteNomeDisplay 
+        {
+            get 
+            {
+                if (!string.IsNullOrEmpty(Cliente?.Nome)) return Cliente.Nome;
+                
+                // Tenta extrair o nome do cliente da string de observação (ex: "Cliente: João Silva (email@...) | ...")
+                var match = Regex.Match(Observacao, @"Cliente:\s*(.*?)(?:\s*\(|$|\|)", RegexOptions.IgnoreCase);
+                if (match.Success && !string.IsNullOrWhiteSpace(match.Groups[1].Value))
+                {
+                    return match.Groups[1].Value.Trim();
+                }
+
+                return "Cliente Avulso";
+            }
+        }
+        
+        public string PagamentoLimpo 
+        {
+            get 
+            {
+                string pg = !string.IsNullOrEmpty(PagamentoParsed) ? PagamentoParsed : FormaPagamento.ToString();
+                // Remove textos de aguardando ou detalhes entre parênteses para ficar limpo
+                pg = Regex.Replace(pg, @"\(.*?\)", "").Trim();
+                return pg;
+            }
+        }
     }
 
     public sealed class ItemPedidoDto

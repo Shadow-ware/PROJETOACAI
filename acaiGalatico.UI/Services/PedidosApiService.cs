@@ -84,5 +84,11 @@ namespace acaiGalatico.UI.Services
             using var response = await _httpClient.DeleteAsync($"api/pedidos/{id}", cancellationToken);
             response.EnsureSuccessStatusCode();
         }
+
+        public async Task FinalizarPedidoAsync(int id, CancellationToken cancellationToken = default)
+        {
+            using var response = await _httpClient.PutAsync($"api/pedidos/{id}/finalizar", null, cancellationToken);
+            response.EnsureSuccessStatusCode();
+        }
     }
 }

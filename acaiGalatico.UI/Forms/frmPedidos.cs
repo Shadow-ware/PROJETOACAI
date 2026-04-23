@@ -1,3 +1,4 @@
+#nullable disable
 using System.Globalization;
 using System.Windows.Forms;
 using acaiGalatico.UI.Models;
@@ -12,6 +13,7 @@ namespace acaiGalatico.UI.Forms
         private List<PedidoDto> _pedidos = new();
         private List<ClienteDto> _clientes = new();
         private bool _carregandoFormulario;
+        private bool _estaAtualizando;
 
         public frmPedidos()
         {
@@ -20,16 +22,15 @@ namespace acaiGalatico.UI.Forms
             InicializarControles();
         }
 
-        protected override async void OnLoad(EventArgs e)
+        protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-            await CarregarDadosAsync();
+            // Inicia o carregamento sem bloquear a UI
+            _ = Task.Run(async () => await CarregarDadosAsync());
             tmrAtualizacao.Start();
         }
 
-        private bool _estaAtualizando;
-
-        private async void tmrAtualizacao_Tick(object sender, EventArgs e)
+        private async void tmrAtualizacao_Tick(object? sender, EventArgs e)
         {
             if (_estaAtualizando) return;
             
@@ -48,9 +49,7 @@ namespace acaiGalatico.UI.Forms
         {
             dtpData.CustomFormat = "dd/MM/yyyy HH:mm";
             cboStatus.DataSource = Enum.GetValues<StatusVendaDto>();
-            cboPagamento.DataSource = Enum.GetValues<TipoPagamentoDto>();
             cboStatus.Format += ComboStatus_Format;
-            cboPagamento.Format += ComboPagamento_Format;
             lblApiInfo.Text = $"API: {_pedidosApiService.BaseUrl}";
 
             // Handlers
@@ -60,15 +59,16 @@ namespace acaiGalatico.UI.Forms
             // Desabilita campos que vêm do site (apenas leitura no desktop)
             dtpData.Enabled = false;
             cboCliente.Enabled = false;
-            cboPagamento.Enabled = false;
             txtValor.ReadOnly = true;
-            txtEndereco.ReadOnly = true;
-            txtBairro.ReadOnly = true;
-            txtObservacao.ReadOnly = true;
 
             // Configura o botão Salvar
             btnSalvar.Text = "Salvar Alterações";
             btnSalvar.Enabled = false;
+
+            // Habilita DoubleBuffering para o DataGridView evitar flicker
+            typeof(Control).InvokeMember("DoubleBuffered",
+                System.Reflection.BindingFlags.SetProperty | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic,
+                null, dgvPedidos, new object[] { true });
         }
 
         private async Task CarregarDadosAsync(int? pedidoParaSelecionar = null, bool isAutoRefresh = false)
@@ -77,56 +77,51 @@ namespace acaiGalatico.UI.Forms
             {
                 // Se for atualização automática, não mostramos o cursor de espera nem mudamos o estado do formulário de forma visível
                 if (!isAutoRefresh) AlternarCarregamento(true);
-                else lblResumo.Text = "Sincronizando...";
 
+                // Busca dados em paralelo
                 var clientesTask = _pedidosApiService.GetClientesAsync();
                 var pedidosTask = _pedidosApiService.GetPedidosAsync();
 
                 await Task.WhenAll(clientesTask, pedidosTask);
 
-                _clientes = clientesTask.Result.OrderBy(c => c.Nome).ToList();
-                _pedidos = pedidosTask.Result.OrderByDescending(p => p.DataVenda).ToList();
+                var clientesOrdenados = clientesTask.Result.OrderBy(c => c.Nome).ToList();
+                var pedidosOrdenados = pedidosTask.Result.OrderByDescending(p => p.DataVenda).ToList();
 
-                // Só atualiza os componentes visíveis se necessário ou se não estiver no meio de uma edição
-                if (!_carregandoFormulario)
-                {
-                    PopularClientes();
-                    PopularGrid();
-                    AtualizarResumo();
+                // Atualiza a UI na thread principal
+                this.Invoke(new Action(() => {
+                    _clientes = clientesOrdenados;
+                    _pedidos = pedidosOrdenados;
 
-                    var idParaSelecionar = pedidoParaSelecionar ?? (_pedidos.FirstOrDefault()?.Id);
-
-                    if (idParaSelecionar.HasValue)
+                    if (!_carregandoFormulario)
                     {
-                        var pedido = _pedidos.FirstOrDefault(p => p.Id == idParaSelecionar.Value);
-                        if (pedido != null)
+                        PopularClientes();
+                        PopularGrid();
+                        AtualizarResumo();
+
+                        var idParaSelecionar = pedidoParaSelecionar ?? (_pedidos.FirstOrDefault()?.Id);
+
+                        if (idParaSelecionar.HasValue)
                         {
-                            CarregarPedidoNoFormulario(pedido);
-                            SelecionarPedidoNaGrid(idParaSelecionar.Value);
+                            var pedido = _pedidos.FirstOrDefault(p => p.Id == idParaSelecionar.Value);
+                            if (pedido != null)
+                            {
+                                CarregarPedidoNoFormulario(pedido);
+                                SelecionarPedidoNaGrid(idParaSelecionar.Value);
+                            }
+                        }
+                        else if (!isAutoRefresh)
+                        {
+                            LimparFormulario();
                         }
                     }
-                    else
-                    {
-                        LimparFormulario();
-                    }
-                }
+                }));
             }
             catch (Exception ex)
             {
-                lblResumo.Text = "API indisponível";
-                
-                // Só mostra MessageBox se for um erro manual, não no timer
-                if (!isAutoRefresh)
-                {
-                    MessageBox.Show(
-                        $"ERRO DE CONEXÃO DESKTOP -> API\n\n" +
-                        $"Base URL: http://localhost:5207/\n" +
-                        $"Endpoint: api/pedidos\n\n" +
-                        $"Detalhes: {ex.Message}",
-                        "Falha ao carregar pedidos",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error);
-                }
+                this.Invoke(new Action(() => {
+                    lblResumo.Text = "API indisponível";
+                    Console.WriteLine($"Erro API: {ex.Message}");
+                }));
             }
             finally
             {
@@ -192,21 +187,8 @@ namespace acaiGalatico.UI.Forms
                 txtCodigo.Text = pedido.Id.ToString();
                 dtpData.Value = pedido.DataVenda < dtpData.MinDate ? dtpData.MinDate : pedido.DataVenda;
                 cboStatus.SelectedItem = pedido.Status;
-                cboPagamento.SelectedItem = pedido.FormaPagamento;
                 cboCliente.SelectedValue = pedido.ClienteId ?? 0;
                 txtValor.Text = pedido.ValorTotal.ToString("N2", _culture);
-                txtEndereco.Text = pedido.EnderecoEntrega ?? string.Empty;
-                txtBairro.Text = pedido.BairroEntrega ?? string.Empty;
-                txtObservacao.Text = pedido.Observacao ?? string.Empty;
-
-                if (pedido.Itens != null && pedido.Itens.Count > 0)
-                {
-                    txtItens.Text = string.Join(Environment.NewLine, pedido.Itens.Select(i => $"• {i.Quantidade}x {i.DisplayNome} - {i.PrecoTotal:C2}"));
-                }
-                else
-                {
-                    txtItens.Text = "Nenhum item detalhado.";
-                }
 
                 btnSalvar.Text = "Salvar alterações";
                 btnExcluir.Enabled = true;
@@ -227,13 +209,8 @@ namespace acaiGalatico.UI.Forms
                 txtCodigo.Text = string.Empty;
                 dtpData.Value = DateTime.Now;
                 cboStatus.SelectedIndex = -1;
-                cboPagamento.SelectedIndex = -1;
                 cboCliente.SelectedIndex = -1;
                 txtValor.Text = string.Empty;
-                txtEndereco.Text = string.Empty;
-                txtBairro.Text = string.Empty;
-                txtObservacao.Text = string.Empty;
-                txtItens.Text = string.Empty;
                 btnSalvar.Text = "Salvar";
                 btnExcluir.Enabled = false;
                 dgvPedidos.ClearSelection();
@@ -265,12 +242,12 @@ namespace acaiGalatico.UI.Forms
             btnExcluir.Enabled = !carregando && !string.IsNullOrEmpty(txtCodigo.Text);
         }
 
-        private async void btnAtualizar_Click(object sender, EventArgs e)
+        private async void btnAtualizar_Click(object? sender, EventArgs e)
         {
             await CarregarDadosAsync();
         }
 
-        private async void btnExcluir_Click(object sender, EventArgs e)
+        private async void btnExcluir_Click(object? sender, EventArgs e)
         {
             if (!int.TryParse(txtCodigo.Text, out var id))
             {
@@ -322,20 +299,24 @@ namespace acaiGalatico.UI.Forms
                 ? selectedClienteId
                 : (int?)null;
 
+            // Busca o pedido original na lista para preservar dados não editáveis (como Observacao)
+            int.TryParse(txtCodigo.Text, out var id);
+            var pedidoOriginal = _pedidos.FirstOrDefault(p => p.Id == id);
+
             return new PedidoDto
             {
+                Id = id,
                 DataVenda = dtpData.Value,
                 ValorTotal = valor,
-                FormaPagamento = cboPagamento.SelectedItem is TipoPagamentoDto pagamento ? pagamento : TipoPagamentoDto.Dinheiro,
                 ClienteId = clienteId,
                 Status = cboStatus.SelectedItem is StatusVendaDto status ? status : StatusVendaDto.Pendente,
-                EnderecoEntrega = txtEndereco.Text.Trim(),
-                BairroEntrega = txtBairro.Text.Trim(),
-                Observacao = txtObservacao.Text.Trim()
+                Observacao = pedidoOriginal?.Observacao ?? string.Empty,
+                EnderecoEntrega = pedidoOriginal?.EnderecoEntrega ?? string.Empty,
+                BairroEntrega = pedidoOriginal?.BairroEntrega ?? string.Empty
             };
         }
 
-        private void dgvPedidos_CellClick(object sender, DataGridViewCellEventArgs e)
+        private void dgvPedidos_CellClick(object? sender, DataGridViewCellEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= dgvPedidos.Rows.Count)
             {
@@ -359,7 +340,7 @@ namespace acaiGalatico.UI.Forms
             SelecionarPedidoNaGrid(pedido.Id);
         }
 
-        private void dgvPedidos_SelectionChanged(object sender, EventArgs e)
+        private void dgvPedidos_SelectionChanged(object? sender, EventArgs e)
         {
             if (_carregandoFormulario)
             {
@@ -377,21 +358,6 @@ namespace acaiGalatico.UI.Forms
             if (e.ListItem is StatusVendaDto status)
             {
                 e.Value = ObterStatusLabel(status);
-            }
-        }
-
-        private void ComboPagamento_Format(object? sender, ListControlConvertEventArgs e)
-        {
-            if (e.ListItem is TipoPagamentoDto pagamento)
-            {
-                e.Value = pagamento switch
-                {
-                    TipoPagamentoDto.Dinheiro => "Dinheiro",
-                    TipoPagamentoDto.Pix => "Pix",
-                    TipoPagamentoDto.Cartao => "Cartão",
-                    TipoPagamentoDto.Fiado => "Fiado",
-                    _ => pagamento.ToString()
-                };
             }
         }
 
@@ -413,7 +379,7 @@ namespace acaiGalatico.UI.Forms
             return "Cliente Avulso";
         }
 
-        private async void btnSalvar_Click(object sender, EventArgs e)
+        private async void btnSalvar_Click(object? sender, EventArgs e)
         {
             if (!int.TryParse(txtCodigo.Text, out var id)) return;
 
@@ -438,7 +404,7 @@ namespace acaiGalatico.UI.Forms
             }
         }
 
-        private void cboStatus_SelectedIndexChanged(object sender, EventArgs e)
+        private void cboStatus_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (_carregandoFormulario) return;
             btnSalvar.Enabled = true;

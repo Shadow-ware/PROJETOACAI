@@ -1,4 +1,4 @@
-#nullable enable
+#nullable disable
 using Guna.UI2.WinForms;
 
 namespace acaiGalatico.UI.Forms
@@ -38,16 +38,6 @@ namespace acaiGalatico.UI.Forms
         private Guna2ComboBox cboCliente;
         private Guna2HtmlLabel lblValor;
         private Guna2TextBox txtValor;
-        private Guna2HtmlLabel lblPagamento;
-        private Guna2ComboBox cboPagamento;
-        private Guna2HtmlLabel lblEndereco;
-        private Guna2TextBox txtEndereco;
-        private Guna2HtmlLabel lblBairro;
-        private Guna2TextBox txtBairro;
-        private Guna2HtmlLabel lblObservacao;
-        private Guna2TextBox txtObservacao;
-        private Guna2HtmlLabel lblItens;
-        private Guna2TextBox txtItens;
         private Guna2Button btnFecharPopup;
         private Guna2Button btnSalvar;
         private Guna2Button btnExcluir;
@@ -124,18 +114,8 @@ namespace acaiGalatico.UI.Forms
             colEditar = new DataGridViewButtonColumn();
             colExcluir = new DataGridViewButtonColumn();
             pnlEditor = new Guna2Panel();
-            txtItens = new Guna2TextBox();
-            lblItens = new Guna2HtmlLabel();
             btnExcluir = new Guna2Button();
             btnSalvar = new Guna2Button();
-            txtObservacao = new Guna2TextBox();
-            lblObservacao = new Guna2HtmlLabel();
-            txtBairro = new Guna2TextBox();
-            lblBairro = new Guna2HtmlLabel();
-            txtEndereco = new Guna2TextBox();
-            lblEndereco = new Guna2HtmlLabel();
-            cboPagamento = new Guna2ComboBox();
-            lblPagamento = new Guna2HtmlLabel();
             txtValor = new Guna2TextBox();
             lblValor = new Guna2HtmlLabel();
             cboCliente = new Guna2ComboBox();
@@ -360,18 +340,8 @@ namespace acaiGalatico.UI.Forms
             // 
             pnlEditor.AutoScroll = true;
             pnlEditor.BackColor = Color.Transparent;
-            pnlEditor.Controls.Add(txtItens);
-            pnlEditor.Controls.Add(lblItens);
             pnlEditor.Controls.Add(btnExcluir);
             pnlEditor.Controls.Add(btnSalvar);
-            pnlEditor.Controls.Add(txtObservacao);
-            pnlEditor.Controls.Add(lblObservacao);
-            pnlEditor.Controls.Add(txtBairro);
-            pnlEditor.Controls.Add(lblBairro);
-            pnlEditor.Controls.Add(txtEndereco);
-            pnlEditor.Controls.Add(lblEndereco);
-            pnlEditor.Controls.Add(cboPagamento);
-            pnlEditor.Controls.Add(lblPagamento);
             pnlEditor.Controls.Add(txtValor);
             pnlEditor.Controls.Add(lblValor);
             pnlEditor.Controls.Add(cboCliente);
@@ -393,35 +363,6 @@ namespace acaiGalatico.UI.Forms
             pnlEditor.Size = new Size(421, 430);
             pnlEditor.TabIndex = 0;
             // 
-            // txtItens
-            // 
-            txtItens.BorderRadius = 10;
-            txtItens.Cursor = Cursors.IBeam;
-            txtItens.CustomizableEdges = customizableEdges3;
-            txtItens.DefaultText = "";
-            txtItens.Font = new Font("Segoe UI", 9F);
-            txtItens.Location = new Point(16, 416);
-            txtItens.Multiline = true;
-            txtItens.Name = "txtItens";
-            txtItens.PlaceholderText = "Nenhum item detalhado.";
-            txtItens.ReadOnly = true;
-            txtItens.ScrollBars = ScrollBars.Vertical;
-            txtItens.SelectedText = "";
-            txtItens.ShadowDecoration.CustomizableEdges = customizableEdges4;
-            txtItens.Size = new Size(386, 70);
-            txtItens.TabIndex = 21;
-            // 
-            // lblItens
-            // 
-            lblItens.BackColor = Color.Transparent;
-            lblItens.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblItens.ForeColor = Color.FromArgb(70, 81, 102);
-            lblItens.Location = new Point(16, 396);
-            lblItens.Name = "lblItens";
-            lblItens.Size = new Size(92, 17);
-            lblItens.TabIndex = 22;
-            lblItens.Text = "Itens Detalhados";
-            // 
             // btnExcluir
             // 
             btnExcluir.BorderRadius = 10;
@@ -429,7 +370,7 @@ namespace acaiGalatico.UI.Forms
             btnExcluir.FillColor = Color.FromArgb(231, 76, 60);
             btnExcluir.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             btnExcluir.ForeColor = Color.White;
-            btnExcluir.Location = new Point(219, 500);
+            btnExcluir.Location = new Point(219, 276);
             btnExcluir.Name = "btnExcluir";
             btnExcluir.ShadowDecoration.CustomizableEdges = customizableEdges6;
             btnExcluir.Size = new Size(180, 40);
@@ -444,120 +385,13 @@ namespace acaiGalatico.UI.Forms
             btnSalvar.FillColor = Color.FromArgb(155, 89, 182);
             btnSalvar.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
             btnSalvar.ForeColor = Color.White;
-            btnSalvar.Location = new Point(16, 500);
+            btnSalvar.Location = new Point(16, 276);
             btnSalvar.Name = "btnSalvar";
             btnSalvar.ShadowDecoration.CustomizableEdges = customizableEdges8;
             btnSalvar.Size = new Size(180, 40);
             btnSalvar.TabIndex = 19;
             btnSalvar.Text = "Salvar alterações";
             btnSalvar.Click += btnSalvar_Click;
-            // 
-            // txtObservacao
-            // 
-            txtObservacao.BorderRadius = 10;
-            txtObservacao.Cursor = Cursors.IBeam;
-            txtObservacao.CustomizableEdges = customizableEdges9;
-            txtObservacao.DefaultText = "";
-            txtObservacao.Font = new Font("Segoe UI", 10F);
-            txtObservacao.Location = new Point(14, 346);
-            txtObservacao.Multiline = true;
-            txtObservacao.Name = "txtObservacao";
-            txtObservacao.PlaceholderText = "Detalhes do pedido";
-            txtObservacao.SelectedText = "";
-            txtObservacao.ShadowDecoration.CustomizableEdges = customizableEdges10;
-            txtObservacao.Size = new Size(386, 42);
-            txtObservacao.TabIndex = 18;
-            // 
-            // lblObservacao
-            // 
-            lblObservacao.BackColor = Color.Transparent;
-            lblObservacao.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblObservacao.ForeColor = Color.FromArgb(70, 81, 102);
-            lblObservacao.Location = new Point(14, 326);
-            lblObservacao.Name = "lblObservacao";
-            lblObservacao.Size = new Size(65, 17);
-            lblObservacao.TabIndex = 17;
-            lblObservacao.Text = "Observação";
-            // 
-            // txtBairro
-            // 
-            txtBairro.BorderRadius = 10;
-            txtBairro.Cursor = Cursors.IBeam;
-            txtBairro.CustomizableEdges = customizableEdges11;
-            txtBairro.DefaultText = "";
-            txtBairro.Font = new Font("Segoe UI", 10F);
-            txtBairro.Location = new Point(217, 276);
-            txtBairro.Name = "txtBairro";
-            txtBairro.PlaceholderText = "Bairro";
-            txtBairro.SelectedText = "";
-            txtBairro.ShadowDecoration.CustomizableEdges = customizableEdges12;
-            txtBairro.Size = new Size(180, 40);
-            txtBairro.TabIndex = 16;
-            // 
-            // lblBairro
-            // 
-            lblBairro.BackColor = Color.Transparent;
-            lblBairro.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblBairro.ForeColor = Color.FromArgb(70, 81, 102);
-            lblBairro.Location = new Point(217, 256);
-            lblBairro.Name = "lblBairro";
-            lblBairro.Size = new Size(34, 17);
-            lblBairro.TabIndex = 15;
-            lblBairro.Text = "Bairro";
-            // 
-            // txtEndereco
-            // 
-            txtEndereco.BorderRadius = 10;
-            txtEndereco.Cursor = Cursors.IBeam;
-            txtEndereco.CustomizableEdges = customizableEdges13;
-            txtEndereco.DefaultText = "";
-            txtEndereco.Font = new Font("Segoe UI", 10F);
-            txtEndereco.Location = new Point(14, 276);
-            txtEndereco.Name = "txtEndereco";
-            txtEndereco.PlaceholderText = "Rua, número...";
-            txtEndereco.SelectedText = "";
-            txtEndereco.ShadowDecoration.CustomizableEdges = customizableEdges14;
-            txtEndereco.Size = new Size(180, 40);
-            txtEndereco.TabIndex = 14;
-            // 
-            // lblEndereco
-            // 
-            lblEndereco.BackColor = Color.Transparent;
-            lblEndereco.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblEndereco.ForeColor = Color.FromArgb(70, 81, 102);
-            lblEndereco.Location = new Point(14, 256);
-            lblEndereco.Name = "lblEndereco";
-            lblEndereco.Size = new Size(52, 17);
-            lblEndereco.TabIndex = 13;
-            lblEndereco.Text = "Endereço";
-            // 
-            // cboPagamento
-            // 
-            cboPagamento.BackColor = Color.Transparent;
-            cboPagamento.BorderRadius = 10;
-            cboPagamento.CustomizableEdges = customizableEdges15;
-            cboPagamento.DrawMode = DrawMode.OwnerDrawFixed;
-            cboPagamento.DropDownStyle = ComboBoxStyle.DropDownList;
-            cboPagamento.FocusedColor = Color.Empty;
-            cboPagamento.Font = new Font("Segoe UI", 10F);
-            cboPagamento.ForeColor = Color.FromArgb(68, 88, 112);
-            cboPagamento.ItemHeight = 34;
-            cboPagamento.Location = new Point(217, 206);
-            cboPagamento.Name = "cboPagamento";
-            cboPagamento.ShadowDecoration.CustomizableEdges = customizableEdges16;
-            cboPagamento.Size = new Size(180, 40);
-            cboPagamento.TabIndex = 12;
-            // 
-            // lblPagamento
-            // 
-            lblPagamento.BackColor = Color.Transparent;
-            lblPagamento.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold);
-            lblPagamento.ForeColor = Color.FromArgb(70, 81, 102);
-            lblPagamento.Location = new Point(217, 186);
-            lblPagamento.Name = "lblPagamento";
-            lblPagamento.Size = new Size(64, 17);
-            lblPagamento.TabIndex = 11;
-            lblPagamento.Text = "Pagamento";
             // 
             // txtValor
             // 

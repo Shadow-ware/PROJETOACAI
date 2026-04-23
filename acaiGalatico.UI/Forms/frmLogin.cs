@@ -33,7 +33,7 @@ namespace acaiGalatico.UI.Forms
             catch { /* Ignora erro de imagem para não travar o login */ }
         }
 
-        private void btnEntrar_Click(object sender, EventArgs e)
+        private void btnEntrar_Click(object? sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(txtEmail.Text) || string.IsNullOrWhiteSpace(txtSenha.Text))
             {
@@ -70,12 +70,12 @@ namespace acaiGalatico.UI.Forms
             Application.Exit();
         }
 
-        private void btnFechar_Click(object sender, EventArgs e)
+        private void btnFechar_Click(object? sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void txtSenha_KeyDown(object sender, KeyEventArgs e)
+        private void txtSenha_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -85,12 +85,12 @@ namespace acaiGalatico.UI.Forms
             }
         }
 
-        private void pnlLeft_Paint(object sender, PaintEventArgs e)
+        private void pnlLeft_Paint(object? sender, PaintEventArgs e)
         {
 
         }
 
-        private void txtEmail_TextChanged(object sender, EventArgs e)
+        private void txtEmail_TextChanged(object? sender, EventArgs e)
         {
 
         }

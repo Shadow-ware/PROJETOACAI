@@ -5,15 +5,21 @@ namespace acaigalatico.Web.ViewModels
 {
     public class PedidoViewModel
     {
-        // Dados do Pedido
+        // Campos Originais (mantidos para compatibilidade)
         public string? Type { get; set; }
-
         public string? Size { get; set; }
-
         public int Quantity { get; set; } = 1;
-
         public List<string>? Fruits { get; set; }
         public List<string>? Toppings { get; set; }
+
+        // Novos Campos (conforme solicitado pelo usuário para o fluxo definitivo)
+        public string? Tipo { get; set; }
+        public string? Tamanho { get; set; }
+        public int Quantidade { get; set; }
+        public string? Frutas { get; set; }
+        public string? Acompanhamentos { get; set; }
+        public string? Pagamento { get; set; }
+        public decimal Valor { get; set; }
 
         // Dados de Pagamento (NÃO PERSISTIDOS)
         public string? PaymentMethod { get; set; } = "card";

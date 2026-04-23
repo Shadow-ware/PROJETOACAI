@@ -26,6 +26,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // --- IDENTITY ---
 builder.Services.AddDefaultIdentity<IdentityUser>(options => {
     options.SignIn.RequireConfirmedAccount = false;
+    options.User.RequireUniqueEmail = true;
     options.Password.RequireDigit = false;
     options.Password.RequireLowercase = false;
     options.Password.RequireNonAlphanumeric = false;
@@ -52,6 +53,11 @@ builder.Services.AddScoped<acaigalatico.Infrastructure.SeedingService>();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddAntiforgery(options => 
+{
+    options.HeaderName = "X-CSRF-TOKEN";
+});
 
 // --- HTTP CLIENT ---
 builder.Services.AddHttpClient();

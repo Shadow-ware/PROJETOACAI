@@ -42,13 +42,54 @@ namespace acaigalatico.Web.Controllers
             var email = await _userManager.GetEmailAsync(identityUser) ?? identityUser.Email ?? string.Empty;
             var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == email);
             
-            // Buscar pedidos do banco LOCAL do Web
-            // Tentamos por ClienteId ou por texto na observação (fallback)
             var telefoneCliente = usuario?.Telefone;
             var cliente = await _context.Clientes.FirstOrDefaultAsync(c => c.Telefone == telefoneCliente);
             
+            // 1. Sincronizar status com a API Central antes de exibir
+            try
+            {
+                using var client = new System.Net.Http.HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(5);
+                var response = await client.GetAsync("http://localhost:5207/api/pedidos");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var apiPedidos = await response.Content.ReadFromJsonAsync<List<Venda>>();
+                    if (apiPedidos != null)
+                    {
+                        var localVendas = await _context.Vendas.ToListAsync();
+                        bool mudou = false;
+
+                        foreach (var apiVenda in apiPedidos)
+                        {
+                            // Tenta encontrar a venda local correspondente
+                            // Como o ID pode ser diferente, tentamos buscar por Data e Valor aproximados
+                            // OU se salvamos o ID da API em algum lugar (não temos esse campo agora)
+                            // Vamos buscar pedidos "Pendente" ou "Preparando" locais que podem ter mudado na API
+                            var correspondenteLocal = localVendas.FirstOrDefault(v => 
+                                v.DataVenda.ToString("yyyyMMddHHmm") == apiVenda.DataVenda.ToString("yyyyMMddHHmm") && 
+                                v.ValorTotal == apiVenda.ValorTotal &&
+                                v.Status != apiVenda.Status);
+
+                            if (correspondenteLocal != null)
+                            {
+                                correspondenteLocal.Status = apiVenda.Status;
+                                _context.Vendas.Update(correspondenteLocal);
+                                mudou = true;
+                            }
+                        }
+
+                        if (mudou) await _context.SaveChangesAsync();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[PEDIDOS-SYNC-ERROR] Falha ao sincronizar status com API: {ex.Message}");
+            }
+
+            // 2. Buscar pedidos do banco LOCAL (agora atualizados)
             var query = _context.Vendas.AsNoTracking();
-            
             List<Venda> todasVendas = await query.ToListAsync();
             
             // Filtra as vendas que pertencem a este usuário

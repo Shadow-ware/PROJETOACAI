@@ -1,11 +1,11 @@
-#nullable enable
+#nullable disable
 using Guna.UI2.WinForms;
 
 namespace acaiGalatico.UI.Forms
 {
     partial class frmPrincipal
     {
-        private System.ComponentModel.IContainer? components = null;
+        private System.ComponentModel.IContainer components = null;
         private Guna2BorderlessForm borderlessForm;
         private Guna2ShadowForm shadowForm;
         private Guna2GradientPanel pnlSidebar;
@@ -17,6 +17,7 @@ namespace acaiGalatico.UI.Forms
         private Guna2HtmlLabel lblPaginaTitulo;
         private Guna2HtmlLabel lblUsuario;
         private Guna2Button btnPedidos;
+        private Guna2Button btnVendas;
         private Guna2Button btnSair;
         private Guna2CirclePictureBox picUsuario;
         private Guna2ControlBox ctlClose;
@@ -54,6 +55,7 @@ namespace acaiGalatico.UI.Forms
             pnlSidebar = new Guna2GradientPanel();
             picLogoPrincipal = new Guna2PictureBox();
             btnSair = new Guna2Button();
+            btnVendas = new Guna2Button();
             btnPedidos = new Guna2Button();
             lblPainel = new Guna2HtmlLabel();
             lblMarca = new Guna2HtmlLabel();
@@ -85,6 +87,7 @@ namespace acaiGalatico.UI.Forms
             pnlSidebar.BackColor = Color.FromArgb(15, 12, 41);
             pnlSidebar.Controls.Add(picLogoPrincipal);
             pnlSidebar.Controls.Add(btnSair);
+            pnlSidebar.Controls.Add(btnVendas);
             pnlSidebar.Controls.Add(btnPedidos);
             pnlSidebar.Controls.Add(lblPainel);
             pnlSidebar.Controls.Add(lblMarca);
@@ -154,6 +157,29 @@ namespace acaiGalatico.UI.Forms
             btnPedidos.Text = "Pedidos";
             btnPedidos.TextAlign = HorizontalAlignment.Left;
             btnPedidos.Click += btnPedidos_Click;
+            // 
+            // btnVendas
+            // 
+            btnVendas.ButtonMode = Guna.UI2.WinForms.Enums.ButtonMode.RadioButton;
+            btnVendas.CheckedState.FillColor = Color.FromArgb(155, 89, 182);
+            btnVendas.CheckedState.ForeColor = Color.White;
+            btnVendas.CustomizableEdges = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            btnVendas.DisabledState.BorderColor = Color.DarkGray;
+            btnVendas.DisabledState.CustomBorderColor = Color.DarkGray;
+            btnVendas.DisabledState.FillColor = Color.FromArgb(169, 169, 169);
+            btnVendas.DisabledState.ForeColor = Color.FromArgb(141, 141, 141);
+            btnVendas.FillColor = Color.Transparent;
+            btnVendas.Font = new Font("Segoe UI Semibold", 10F, FontStyle.Bold);
+            btnVendas.ForeColor = Color.FromArgb(219, 228, 243);
+            btnVendas.HoverState.FillColor = Color.FromArgb(60, 74, 109);
+            btnVendas.Location = new Point(12, 262);
+            btnVendas.Name = "btnVendas";
+            btnVendas.ShadowDecoration.CustomizableEdges = new Guna.UI2.WinForms.Suite.CustomizableEdges();
+            btnVendas.Size = new Size(200, 71);
+            btnVendas.TabIndex = 4;
+            btnVendas.Text = "Produção (Vendas)";
+            btnVendas.TextAlign = HorizontalAlignment.Left;
+            btnVendas.Click += btnVendas_Click;
             // 
             // lblPainel
             // 
