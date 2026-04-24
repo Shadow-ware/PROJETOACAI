@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Admin Açaí Galáctico</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/site.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --admin-purple: #9b59b6;
+            --admin-dark: #2c3e50;
+            --admin-light: #f8f9fa;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Style */
+        #sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background: var(--admin-dark);
+            color: white;
+            transition: all 0.3s;
+            z-index: 1000;
+            box-shadow: 4px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .sidebar-header img {
+            width: 120px;
+            margin-bottom: 10px;
+        }
+
+        .nav-link-admin {
+            padding: 12px 25px;
+            color: rgba(255,255,255,0.7);
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            border-left: 4px solid transparent;
+        }
+
+        .nav-link-admin:hover, .nav-link-admin.active {
+            color: white;
+            background: rgba(255,255,255,0.05);
+            border-left-color: var(--admin-purple);
+        }
+
+        .nav-link-admin i {
+            width: 25px;
+            margin-right: 10px;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        #content {
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            min-height: 100vh;
+            transition: all 0.3s;
+        }
+
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .admin-card {
+            background: white;
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: box-shadow 0.2s;
+        }
+
+        .admin-card:hover {
+            box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .bg-gradient-purple { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        .bg-gradient-blue { background: linear-gradient(45deg, #3498db, #2980b9); }
+        .bg-gradient-green { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+        .bg-gradient-orange { background: linear-gradient(45deg, #f39c12, #d35400); }
+
+        /* CRUD Table */
+        .table-admin thead th {
+            background: #f8f9fa;
+            border-top: none;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 600;
+            padding: 15px;
+        }
+
+        .table-admin tbody td {
+            padding: 15px;
+            vertical-align: middle;
+            border-bottom: 1px solid #f1f2f6;
+        }
+
+        .product-img-td {
+            width: 50px;
+            height: 50px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav id="sidebar">
+        <div class="sidebar-header">
+            <a href="/">
+                <img src="/images/logo.png" alt="Açaí Galáctico" />
+            </a>
+            <h6 class="mt-2 text-uppercase fw-bold" style="letter-spacing: 1px; font-size: 0.7rem; color: #7f8c8d;">Painel Admin</h6>
+        </div>
+
+        <div class="mt-4">
+            <a class="nav-link-admin active" href="/Admin">
+                <i class="fas fa-th-large"></i> Dashboard
+            </a>
+            <a class="nav-link-admin " href="/Admin/Pedidos">
+                <i class="fas fa-shopping-cart"></i> Pedidos
+            </a>
+            <a class="nav-link-admin " href="/Admin/Produtos">
+                <i class="fas fa-ice-cream"></i> Produtos
+            </a>
+            <a class="nav-link-admin " href="/Admin/Clientes">
+                <i class="fas fa-users"></i> Clientes
+            </a>
+            <a class="nav-link-admin " href="/Admin/EditarSite">
+                <i class="fas fa-edit"></i> Editar Site
+            </a>
+            <a class="nav-link-admin " href="/Admin/EditarCardapio">
+                <i class="fas fa-utensils"></i> Cardápio
+            </a>
+        </div>
+
+        <div style="position: absolute; bottom: 20px; width: 100%; padding: 0 20px;">
+            <form method="post" action="/Identity/Account/Logout?returnUrl=%2F">
+                <button type="submit" class="btn btn-outline-light w-100 rounded-pill btn-sm">
+                    <i class="fas fa-sign-out-alt me-2"></i> Sair
+                </button>
+            <input name="__RequestVerificationToken" type="hidden" value="CfDJ8KMcdTBLkhNPlQRKL3jm_RmSN65av96Jx5jOvsrnbkg5KFpKfA0cj-cKhCNAkmo2z_emCxSl0XjbX0XaxhrVv4_oHQ5tRijyQZhOhZ-kUJB_Jy3fSQjm5MtnvRb5MrENM0ETc93H9qS8K5KBVtvFJVI" /></form>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div id="content">
+        <nav class="top-navbar d-flex justify-content-end align-items-center">
+            <div class="user-profile d-flex align-items-center">
+                <div class="text-end me-3">
+                    <span class="d-block fw-bold" style="font-size: 0.9rem;"></span>
+                    <small class="text-muted" style="font-size: 0.7rem;">Administrador</small>
+                </div>
+                <div class="avatar bg-purple-soft text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background: #9b59b6;">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container-fluid px-4">
+            
+
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <a class="text-decoration-none text-dark h-100 d-block" href="/Admin/EditMetrics">
+            <div class="admin-card p-4 d-flex align-items-center h-100">
+                <div class="stat-icon bg-gradient-purple me-3">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Vendas Hoje <i class="fas fa-edit ms-1 text-primary"></i></small>
+                    <h3 class="m-0 fw-bold">8</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="text-decoration-none text-dark h-100 d-block" href="/Admin/EditMetrics">
+            <div class="admin-card p-4 d-flex align-items-center h-100">
+                <div class="stat-icon bg-gradient-blue me-3">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Total Clientes <i class="fas fa-edit ms-1 text-primary"></i></small>
+                    <h3 class="m-0 fw-bold">3</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a class="text-decoration-none text-dark h-100 d-block" href="/Admin/EditMetrics">
+            <div class="admin-card p-4 d-flex align-items-center h-100">
+                <div class="stat-icon bg-gradient-green me-3">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div>
+                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Faturamento <i class="fas fa-edit ms-1 text-primary"></i></small>
+                    <h3 class="m-0 fw-bold">R$ 75,50</h3>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-8">
+        <div class="admin-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold m-0">Vendas dos Últimos 7 Dias</h5>
+                <a class="btn btn-sm btn-outline-primary rounded-pill" href="/Admin/EditChart"><i class="fas fa-chart-line me-1"></i> Configurar Gráfico</a>
+            </div>
+            <canvas id="salesChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="admin-card p-4">
+            <h5 class="fw-bold mb-4">Vendas por Categoria</h5>
+            <canvas id="categoryChart" height="250"></canvas>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-4">
+    <div class="col-12">
+        <div class="admin-card p-4">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h5 class="fw-bold m-0"><i class="fas fa-history me-2 text-primary"></i> Últimos Pedidos no Sistema</h5>
+                <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="/Admin/Pedidos">Ver Todos</a>
+            </div>
+            <div class="table-responsive rounded-4 overflow-hidden border">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="border-0 small uppercase text-muted p-3">ID</th>
+                            <th class="border-0 small uppercase text-muted p-3">Data</th>
+                            <th class="border-0 small uppercase text-muted p-3">Status</th>
+                            <th class="border-0 small uppercase text-muted p-3">Cliente</th>
+                            <th class="border-0 small uppercase text-muted p-3 text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                                <tr>
+                                    <td class="p-3 fw-bold border-0">#32</td>
+                                    <td class="p-3 border-0 text-muted">23/04 18:49</td>
+                                    <td class="p-3 border-0">
+                                        <span class="badge rounded-pill bg-info text-white">Em andamento</span>
+                                    </td>
+                                    <td class="p-3 border-0">Administrador A&#xE7;a&#xED;</td>
+                                    <td class="p-3 border-0 text-end text-success fw-bold">R$ 15,00</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 fw-bold border-0">#31</td>
+                                    <td class="p-3 border-0 text-muted">23/04 18:31</td>
+                                    <td class="p-3 border-0">
+                                        <span class="badge rounded-pill bg-success">Entregue</span>
+                                    </td>
+                                    <td class="p-3 border-0">Administrador A&#xE7;a&#xED;</td>
+                                    <td class="p-3 border-0 text-end text-success fw-bold">R$ 10,00</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 fw-bold border-0">#30</td>
+                                    <td class="p-3 border-0 text-muted">23/04 18:26</td>
+                                    <td class="p-3 border-0">
+                                        <span class="badge rounded-pill bg-warning text-dark">Novo pedido</span>
+                                    </td>
+                                    <td class="p-3 border-0">Administrador A&#xE7;a&#xED;</td>
+                                    <td class="p-3 border-0 text-end text-success fw-bold">R$ 10,00</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 fw-bold border-0">#28</td>
+                                    <td class="p-3 border-0 text-muted">23/04 17:18</td>
+                                    <td class="p-3 border-0">
+                                        <span class="badge rounded-pill bg-info text-white">Em andamento</span>
+                                    </td>
+                                    <td class="p-3 border-0">LiviaMoreira</td>
+                                    <td class="p-3 border-0 text-end text-success fw-bold">R$ 14,00</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-3 fw-bold border-0">#29</td>
+                                    <td class="p-3 border-0 text-muted">23/04 17:18</td>
+                                    <td class="p-3 border-0">
+                                        <span class="badge rounded-pill bg-warning text-dark">Novo pedido</span>
+                                    </td>
+                                    <td class="p-3 border-0">LiviaMoreira</td>
+                                    <td class="p-3 border-0 text-end text-success fw-bold">R$ 14,00</td>
+                                </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+        </div>
+    </div>
+
+    <script src="/lib/jquery/dist/jquery.min.js"></script>
+    <script src="/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Gráfico de Vendas Dinâmico
+        const salesCtx = document.getElementById('salesChart').getContext('2d');
+        const salesLabels = ["18/04","19/04","20/04","21/04","22/04","23/04","24/04"];
+        const salesData = [1010,100.00,0.00,0.00,48.00,5.00,0.00];
+
+        new Chart(salesCtx, {
+            type: 'line',
+            data: {
+                labels: salesLabels,
+                datasets: [{
+                    label: 'Vendas (R$)',
+                    data: salesData,
+                    borderColor: '#9b59b6',
+                    backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return 'R$ ' + context.parsed.y.toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: { 
+                        beginAtZero: true, 
+                        grid: { color: '#f1f2f6' },
+                        ticks: {
+                            callback: function(value) {
+                                return 'R$ ' + value;
+                            }
+                        }
+                    },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
+
+        // Gráfico de Categorias
+        const catCtx = document.getElementById('categoryChart').getContext('2d');
+        new Chart(catCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Açaí', 'Bebidas', 'Salgados', 'Outros'],
+                datasets: [{
+                    data: [65, 15, 12, 8],
+                    backgroundColor: ['#9b59b6', '#3498db', '#2ecc71', '#f1c40f'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                plugins: {
+                    legend: { position: 'bottom' }
+                },
+                cutout: '70%'
+            }
+        });
+    </script>
+
+</body>
+</html>

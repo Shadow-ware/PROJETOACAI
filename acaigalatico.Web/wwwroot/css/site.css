@@ -41,7 +41,7 @@ body {
 }
 
 .logo-img {
-    max-height: 90px; /* Increased from 70px */
+    max-height: 120px; /* Increased from 90px */
     width: auto;
     transition: transform 0.3s ease;
 }

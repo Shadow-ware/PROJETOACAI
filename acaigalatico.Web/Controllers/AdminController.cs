@@ -55,25 +55,57 @@ public class AdminController : Controller
             var hoje = DateTime.Now.Date;
             var seteDiasAtras = hoje.AddDays(-7);
 
-            ViewBag.VendasHoje = await _context.Vendas.CountAsync(v => v.DataVenda.Date == hoje);
-            ViewBag.TotalClientes = await _context.Clientes.CountAsync();
-            ViewBag.Faturamento = await _context.Vendas.SumAsync(v => (decimal?)v.ValorTotal) ?? 0;
+            _logger.LogInformation("Dashboard Index acessado. Hoje: {Hoje}", hoje.ToString("dd/MM/yyyy"));
 
-            // Dados para o gráfico de 7 dias
-            var salesByDay = await _context.Vendas
-                .Where(v => v.DataVenda >= seteDiasAtras)
-                .GroupBy(v => v.DataVenda.Date)
-                .Select(g => new { Day = g.Key, Total = g.Sum(v => v.ValorTotal) })
-                .ToListAsync();
+            // 1. Vendas Hoje (Prioriza manual se existir)
+            var m_vendasHoje = await _context.SiteContents.FirstOrDefaultAsync(c => c.Key == "Admin_Metrics_VendasHoje");
+            if (m_vendasHoje != null)
+                ViewBag.VendasHoje = m_vendasHoje.Value;
+            else
+                ViewBag.VendasHoje = await _context.Vendas.CountAsync(v => v.DataVenda.Date == hoje);
 
+            // 2. Total Clientes (Prioriza manual se existir)
+            var m_totalClientes = await _context.SiteContents.FirstOrDefaultAsync(c => c.Key == "Admin_Metrics_TotalClientes");
+            if (m_totalClientes != null)
+                ViewBag.TotalClientes = m_totalClientes.Value;
+            else
+                ViewBag.TotalClientes = await _context.Clientes.CountAsync();
+
+            // 3. Faturamento (Prioriza manual se existir)
+            var m_faturamento = await _context.SiteContents.FirstOrDefaultAsync(c => c.Key == "Admin_Metrics_Faturamento");
+            if (m_faturamento != null && decimal.TryParse(m_faturamento.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal f))
+                ViewBag.Faturamento = f;
+            else
+                ViewBag.Faturamento = await _context.Vendas.SumAsync(v => (decimal?)v.ValorTotal) ?? 0;
+
+            // 4. Dados para o gráfico de 7 dias (Sincronizado com a lógica do EditChart)
             var labels = new List<string>();
             var data = new List<decimal>();
 
             for (int i = 6; i >= 0; i--)
             {
                 var date = hoje.AddDays(-i);
-                labels.Add(date.ToString("dd/MM"));
-                data.Add(salesByDay.FirstOrDefault(s => s.Day == date)?.Total ?? 0);
+                var label = date.ToString("dd/MM");
+                labels.Add(label);
+
+                // Tenta buscar valor manual no SiteContents
+                var manualValue = await _context.SiteContents
+                    .FirstOrDefaultAsync(c => c.Key == $"Admin_Chart_Value_{label}");
+
+                if (manualValue != null && decimal.TryParse(manualValue.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+                {
+                    _logger.LogInformation("Valor manual encontrado para {Label}: {Valor}", label, val);
+                    data.Add(val);
+                }
+                else
+                {
+                    // Fallback para dados reais do banco
+                    var realValue = await _context.Vendas
+                        .Where(v => v.DataVenda.Date == date)
+                        .SumAsync(v => (decimal?)v.ValorTotal) ?? 0;
+                    _logger.LogInformation("Valor real usado para {Label}: {Valor}", label, realValue);
+                    data.Add(realValue);
+                }
             }
 
             ViewBag.SalesLabels = labels;
@@ -740,6 +772,92 @@ public class AdminController : Controller
                     Page = "Admin", 
                     Type = "Metric" 
                 });
+            }
+        }
+
+        // ================================
+        // 🔥 CONFIGURAR GRÁFICO
+        // ================================
+        [HttpGet]
+        public async Task<IActionResult> EditChart()
+        {
+            _logger.LogInformation("Acessando Editar Gráfico Admin");
+
+            var hoje = DateTime.Now.Date;
+            var labels = new List<string>();
+            var data = new List<decimal>();
+
+            for (int i = 6; i >= 0; i--)
+            {
+                var date = hoje.AddDays(-i);
+                var label = date.ToString("dd/MM");
+                labels.Add(label);
+
+                // Tenta buscar valor manual no SiteContents
+                var manualValue = await _context.SiteContents
+                    .FirstOrDefaultAsync(c => c.Key == $"Admin_Chart_Value_{label}");
+
+                if (manualValue != null && decimal.TryParse(manualValue.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal val))
+                {
+                    data.Add(val);
+                }
+                else
+                {
+                    // Fallback para dados reais do banco
+                    var realValue = await _context.Vendas
+                        .Where(v => v.DataVenda.Date == date)
+                        .SumAsync(v => (decimal?)v.ValorTotal) ?? 0;
+                    data.Add(realValue);
+                }
+            }
+
+            ViewBag.SalesLabels = labels;
+            ViewBag.SalesData = data;
+
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateChart(List<string> labels, List<string> values)
+        {
+            _logger.LogInformation("Atualizando Dados do Gráfico. Recebidos {Count} labels e {ValCount} valores.", labels?.Count ?? 0, values?.Count ?? 0);
+
+            try
+            {
+                if (labels == null || values == null || labels.Count != values.Count)
+                {
+                    _logger.LogWarning("Dados inválidos recebidos no UpdateChart.");
+                    TempData["ErrorMessage"] = "Dados inválidos.";
+                    return RedirectToAction("EditChart");
+                }
+
+                for (int i = 0; i < labels.Count; i++)
+                {
+                    var label = labels[i];
+                    var valueStr = values[i].Replace(",", ".");
+                    
+                    _logger.LogInformation("Processando Dia {Label}: Valor original={Original}, Valor processado={Processed}", label, values[i], valueStr);
+
+                    if (decimal.TryParse(valueStr, NumberStyles.Any, CultureInfo.InvariantCulture, out _))
+                    {
+                        await UpdateOrAddContent($"Admin_Chart_Value_{label}", valueStr);
+                    }
+                    else 
+                    {
+                        _logger.LogWarning("Valor inválido para {Label}: {Value}", label, values[i]);
+                    }
+                }
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Gráfico atualizado com sucesso!";
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro ao atualizar gráfico");
+                TempData["ErrorMessage"] = "Erro ao salvar dados do gráfico: " + ex.Message;
+                return RedirectToAction("EditChart");
             }
         }
 

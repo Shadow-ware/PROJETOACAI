@@ -76,6 +76,18 @@ builder.Services.AddSession(options =>
 
 var app = builder.Build();
 
+// --- FIX PARA PREVIEW NO IDE (ERR_ABORTED) ---
+app.Use(async (context, next) =>
+{
+    context.Response.OnStarting(() => {
+        context.Response.Headers.Remove("X-Frame-Options");
+        context.Response.Headers.Remove("Frame-Options");
+        context.Response.Headers["Content-Security-Policy"] = "frame-ancestors *";
+        return Task.CompletedTask;
+    });
+    await next();
+});
+
 // --- SEED AUTOMÁTICO ---
 using (var scope = app.Services.CreateScope())
 {
@@ -86,6 +98,9 @@ using (var scope = app.Services.CreateScope())
         db.Database.EnsureCreated();
         var seeding = services.GetRequiredService<acaigalatico.Infrastructure.SeedingService>();
         seeding.SeedAsync().GetAwaiter().GetResult();
+        
+        // Check DB
+        acaigalatico.Web.DbCheck.Check(services);
     }
     catch (Exception ex)
     {
